@@ -213,6 +213,8 @@ message BugsProject {
     string default_assignee_id = 7;
     ProjectVisibility visibility = 8;
     int64 created_date = 9;
+    string repository_url = 10;
+    string webhook_secret = 11;
     repeated Label labels = 20;
     repeated Component components = 21;
     repeated Milestone milestones = 22;
@@ -293,6 +295,7 @@ message Bug {
     repeated Watcher watchers = 43;
     repeated Vote votes = 44;
     repeated string related_bug_ids = 45;
+    string linked_commit_sha = 46;
     erp.AuditInfo audit_info = 50;
 }
 
@@ -343,6 +346,7 @@ message Feature {
     repeated Vote votes = 44;
     repeated string related_feature_ids = 45;
     repeated string related_bug_ids = 46;
+    string linked_commit_sha = 47;
     erp.AuditInfo audit_info = 50;
 }
 

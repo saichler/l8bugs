@@ -1004,11 +1004,19 @@ Layer8DReferenceRegistry.register({
 - ✓ Desktop UI: TRIAGE_STATUS enum, triage columns in Bug/Feature tables, expanded AI Analysis form sections, Triage Inbox subnav + service view
 - ✓ Mobile UI: TRIAGE_STATUS enum, triage columns, expanded AI Analysis forms, Triage tab + TRACKING_SERVICES entry
 
-### Phase 4: AI Agent Integration
+### Phase 4: AI Agent Integration ✓
 - MCP server implementation
 - Agent delegation workflow
 - Git integration (commit/PR linking, auto-transitions)
 - AI root cause analysis for bugs with stack traces
+
+**Completed:**
+- ✓ Protobuf additions: repository_url/webhook_secret on BugsProject, linked_commit_sha on Bug and Feature
+- ✓ MCP Server: Standalone stdio binary (mcp/protocol.go, server.go, tools.go, handlers.go, main1/main.go) with 6 tools: list_issues, read_issue, create_issue, update_issue, add_comment, search_issues — JSON-RPC 2.0 over stdin/stdout
+- ✓ Git Integration: GitHub webhook handler (webhook/webhook.go, webhook/parser.go) registered on existing web server; handles PR merge (auto-transition In Review → Resolved/Done) and push events (commit SHA linking); HMAC-SHA256 signature verification
+- ✓ AI Root Cause Analysis: Stack trace parser (triage/rootcause.go) supporting Go, Java, Python, JavaScript; enhanced LLM prompt with structured stack frames; integrated into triage flow — when bug has stack trace, runs secondary root cause analysis after basic triage
+- ✓ Desktop UI: repositoryUrl/webhookSecret on BugsProject form, linkedCommitSha on Bug/Feature forms, repositoryUrl column on BugsProject
+- ✓ Mobile UI: Parity with desktop — same form and column additions
 
 ### Phase 5: Analytics & Polish
 - Dashboard with configurable widgets

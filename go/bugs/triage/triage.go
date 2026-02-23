@@ -97,6 +97,22 @@ func (t *Triager) triageBug(bug *l8bugs.Bug) error {
 	}
 
 	fmt.Printf("[triage] bug %s triaged (confidence: %d%%)\n", bug.BugId, result.Confidence)
+
+	// Enhanced root cause analysis when stack trace is present.
+	if bug.StackTrace != "" {
+		rca, err := t.AnalyzeRootCause(bug)
+		if err != nil {
+			fmt.Printf("[triage] root cause analysis failed for %s: %s\n", bug.BugId, err)
+		} else {
+			bug.AiRootCause = formatRootCauseForStorage(bug.AiRootCause, rca)
+			if err := common.PutEntity(bugServiceName, serviceArea, bug, t.vnic); err != nil {
+				fmt.Printf("[triage] failed to save root cause: %s\n", err)
+			} else {
+				fmt.Printf("[triage] bug %s root cause analyzed (confidence: %d%%)\n", bug.BugId, rca.Confidence)
+			}
+		}
+	}
+
 	return nil
 }
 

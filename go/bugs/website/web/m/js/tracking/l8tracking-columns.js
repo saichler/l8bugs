@@ -61,7 +61,8 @@ limitations under the License.
             ...col.col('key', 'Key'),
             ...col.enum('status', 'Status', enums.PROJECT_STATUS_VALUES, render.projectStatus),
             ...col.enum('visibility', 'Visibility', null, render.projectVisibility),
-            ...col.col('ownerId', 'Owner')
+            ...col.col('ownerId', 'Owner'),
+            ...col.col('repositoryUrl', 'Repository')
         ],
 
         BugsAssignee: [

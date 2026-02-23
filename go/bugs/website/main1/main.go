@@ -17,6 +17,7 @@ package main
 
 import (
 	"github.com/saichler/l8bugs/go/bugs/common"
+	"github.com/saichler/l8bugs/go/bugs/webhook"
 	"github.com/saichler/l8bugs/go/bugs/website"
 	"github.com/saichler/l8bus/go/overlay/health"
 	"github.com/saichler/l8types/go/ifs"
@@ -43,6 +44,8 @@ func startWebServer(port int, cert string) {
 
 	nic1 := website.CreateVnic(common.BUGS_VNET)
 	//nic2 := website.CreateVnic(common.BUGS_LOGS_VNET)
+
+	webhook.Register(nic1)
 
 	hs, ok := nic1.Resources().Services().ServiceHandler(health.ServiceName, 0)
 	if ok {

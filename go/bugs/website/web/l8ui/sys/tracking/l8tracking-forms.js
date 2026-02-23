@@ -49,6 +49,7 @@
                 ...f.date('resolvedDate', 'Resolved Date'),
                 ...f.text('linkedPrUrl', 'Linked PR URL'),
                 ...f.text('linkedBranch', 'Linked Branch'),
+                ...f.text('linkedCommitSha', 'Linked Commit'),
                 ...f.reference('duplicateOfId', 'Duplicate Of', 'Bug'),
                 ...f.reference('parentBugId', 'Parent Bug', 'Bug')
             ]),
@@ -130,6 +131,7 @@
             f.section('Links', [
                 ...f.text('linkedPrUrl', 'Linked PR URL'),
                 ...f.text('linkedBranch', 'Linked Branch'),
+                ...f.text('linkedCommitSha', 'Linked Commit'),
                 ...f.reference('parentFeatureId', 'Parent Feature', 'Feature')
             ]),
             f.section('Comments', [
@@ -183,7 +185,9 @@
                 ...f.text('ownerId', 'Owner'),
                 ...f.select('status', 'Status', enums.PROJECT_STATUS),
                 ...f.select('visibility', 'Visibility', enums.PROJECT_VISIBILITY),
-                ...f.text('defaultAssigneeId', 'Default Assignee')
+                ...f.text('defaultAssigneeId', 'Default Assignee'),
+                ...f.text('repositoryUrl', 'Repository URL'),
+                ...f.text('webhookSecret', 'Webhook Secret')
             ]),
             f.section('Labels', [
                 ...f.inlineTable('labels', 'Labels', [

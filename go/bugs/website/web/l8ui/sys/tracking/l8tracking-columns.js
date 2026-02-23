@@ -42,7 +42,8 @@
             ...col.col('key', 'Key'),
             ...col.enum('status', 'Status', null, render.projectStatus),
             ...col.enum('visibility', 'Visibility', null, render.projectVisibility),
-            ...col.col('ownerId', 'Owner')
+            ...col.col('ownerId', 'Owner'),
+            ...col.col('repositoryUrl', 'Repository')
         ],
 
         BugsAssignee: [
