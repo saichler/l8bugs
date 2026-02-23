@@ -13,16 +13,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 /**
- * Mobile Reference Registry - Bugs Module
+ * Mobile Reference Registry - Tracking Module
  * Reference configurations for Bug Tracking models
  */
-const refBugsM = window.Layer8RefFactory;
+const refTrackingM = window.Layer8RefFactory;
 
-window.Layer8MReferenceRegistryBugs = {
-    ...refBugsM.simple('BugsProject', 'projectId', 'name', 'Project'),
-    ...refBugsM.simple('Bug', 'bugId', 'title', 'Bug'),
-    ...refBugsM.simple('Feature', 'featureId', 'title', 'Feature')
+window.Layer8MReferenceRegistryTracking = {
+    ...refTrackingM.simple('BugsProject', 'projectId', 'name', 'Project'),
+    ...refTrackingM.simple('BugsAssignee', 'assigneeId', 'name', 'Assignee'),
+    ...refTrackingM.simple('Bug', 'bugId', 'title', 'Bug'),
+    ...refTrackingM.simple('Feature', 'featureId', 'title', 'Feature')
 };
 
 // Register with the central registry
-Layer8MReferenceRegistry.register(window.Layer8MReferenceRegistryBugs);
+Layer8MReferenceRegistry.register(window.Layer8MReferenceRegistryTracking);

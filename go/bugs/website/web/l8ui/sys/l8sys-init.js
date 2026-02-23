@@ -22,11 +22,11 @@ limitations under the License.
     // 1. Bootstrap using shared factory
     Layer8DModuleFactory.create({
         namespace: 'L8Sys',
-        defaultModule: 'health',
-        defaultService: 'users',
-        sectionSelector: 'health',
+        defaultModule: 'tracking',
+        defaultService: 'bugs',
+        sectionSelector: 'tracking',
         initializerName: 'initializeL8Sys',
-        requiredNamespaces: ['L8Security']
+        requiredNamespaces: ['L8Security', 'L8Tracking']
     });
 
     // 2. Initialize Health Monitor and Modules Settings when System section loads
@@ -48,7 +48,7 @@ limitations under the License.
         } else if (service.model === 'L8Credentials' && window.L8SysCredentialsCRUD) {
             L8SysCredentialsCRUD.openAdd(service);
         } else {
-            origOpenAdd.call(SYS, service);
+            origOpenAdd.call(L8Sys, service);
         }
     };
 
@@ -61,7 +61,7 @@ limitations under the License.
         } else if (service.model === 'L8Credentials' && window.L8SysCredentialsCRUD) {
             L8SysCredentialsCRUD.openEdit(service, id);
         } else {
-            origOpenEdit.call(SYS, service, id);
+            origOpenEdit.call(L8Sys, service, id);
         }
     };
 
@@ -74,7 +74,7 @@ limitations under the License.
         } else if (service.model === 'L8Credentials' && window.L8SysCredentialsCRUD) {
             L8SysCredentialsCRUD.confirmDelete(service, id);
         } else {
-            origConfirmDelete.call(SYS, service, id);
+            origConfirmDelete.call(L8Sys, service, id);
         }
     };
 

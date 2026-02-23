@@ -1,11 +1,29 @@
+/*
+© 2025 Sharon Aicler (saichler@gmail.com)
+
+Layer 8 Ecosystem is licensed under the Apache License, Version 2.0.
+You may obtain a copy of the License at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+/**
+ * Mobile L8Tracking Module - Form Definitions
+ * Desktop Equivalent: l8ui/sys/tracking/l8tracking-forms.js
+ */
 (function() {
     'use strict';
-    window.BugsTracking = window.BugsTracking || {};
+    window.MobileL8Tracking = window.MobileL8Tracking || {};
 
     const f = window.Layer8FormFactory;
-    const enums = BugsTracking.enums;
+    const enums = MobileL8Tracking.enums;
 
-    BugsTracking.forms = {
+    MobileL8Tracking.forms = {
         Bug: f.form('Bug', [
             f.section('Bug Details', [
                 ...f.text('bugNumber', 'Bug #'),
@@ -22,7 +40,7 @@
                 ...f.textarea('actualBehavior', 'Actual Behavior')
             ]),
             f.section('Assignment', [
-                ...f.text('assigneeId', 'Assignee'),
+                ...f.reference('assigneeId', 'Assignee', 'BugsAssignee'),
                 ...f.select('assigneeType', 'Assignee Type', enums.ASSIGNEE_TYPE),
                 ...f.text('reporterId', 'Reporter'),
                 ...f.text('component', 'Component'),
@@ -89,7 +107,7 @@
                 ...f.textarea('acceptanceCriteria', 'Acceptance Criteria')
             ]),
             f.section('Assignment', [
-                ...f.text('assigneeId', 'Assignee'),
+                ...f.reference('assigneeId', 'Assignee', 'BugsAssignee'),
                 ...f.select('assigneeType', 'Assignee Type', enums.ASSIGNEE_TYPE),
                 ...f.text('reporterId', 'Reporter'),
                 ...f.text('component', 'Component'),
@@ -133,6 +151,16 @@
             ])
         ]),
 
+        BugsAssignee: f.form('Assignee', [
+            f.section('Assignee Details', [
+                ...f.text('name', 'Name', true),
+                ...f.text('email', 'Email'),
+                ...f.select('assigneeType', 'Type', enums.ASSIGNEE_TYPE),
+                ...f.reference('projectId', 'Project', 'BugsProject'),
+                ...f.checkbox('active', 'Active')
+            ])
+        ]),
+
         BugsProject: f.form('Project', [
             f.section('Project Details', [
                 ...f.text('name', 'Name', true),
@@ -171,11 +199,5 @@
                 ])
             ])
         ])
-    };
-
-    BugsTracking.primaryKeys = {
-        Bug: 'bugId',
-        Feature: 'featureId',
-        BugsProject: 'projectId'
     };
 })();

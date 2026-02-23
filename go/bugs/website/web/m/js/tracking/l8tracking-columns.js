@@ -13,18 +13,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 /**
- * Mobile Bugs Tracking Module - Column Definitions
- * Desktop Equivalent: bugs/tracking/tracking-columns.js
+ * Mobile L8Tracking Module - Column Definitions
+ * Desktop Equivalent: l8ui/sys/tracking/l8tracking-columns.js
  */
 (function() {
     'use strict';
-    window.MobileBugsTracking = window.MobileBugsTracking || {};
+    window.MobileL8Tracking = window.MobileL8Tracking || {};
 
     const col = window.Layer8ColumnFactory;
-    const enums = MobileBugsTracking.enums;
-    const render = MobileBugsTracking.render;
+    const enums = MobileL8Tracking.enums;
+    const render = MobileL8Tracking.render;
 
-    MobileBugsTracking.columns = {
+    MobileL8Tracking.columns = {
         Bug: [
             ...col.id('bugId'),
             ...col.col('bugNumber', 'Bug #'),
@@ -58,12 +58,22 @@ limitations under the License.
             ...col.enum('status', 'Status', enums.PROJECT_STATUS_VALUES, render.projectStatus),
             ...col.enum('visibility', 'Visibility', null, render.projectVisibility),
             ...col.col('ownerId', 'Owner')
+        ],
+
+        BugsAssignee: [
+            ...col.id('assigneeId'),
+            ...col.col('name', 'Name'),
+            ...col.col('email', 'Email'),
+            ...col.enum('assigneeType', 'Type', null, render.assigneeType),
+            ...col.col('projectId', 'Project'),
+            ...col.col('active', 'Active')
         ]
     };
 
-    MobileBugsTracking.primaryKeys = {
+    MobileL8Tracking.primaryKeys = {
         Bug: 'bugId',
         Feature: 'featureId',
-        BugsProject: 'projectId'
+        BugsProject: 'projectId',
+        BugsAssignee: 'assigneeId'
     };
 })();

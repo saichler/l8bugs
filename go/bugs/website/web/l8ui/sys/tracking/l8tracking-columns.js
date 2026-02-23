@@ -1,11 +1,11 @@
 (function() {
     'use strict';
-    window.BugsTracking = window.BugsTracking || {};
+    window.L8Tracking = window.L8Tracking || {};
 
     const col = window.Layer8ColumnFactory;
-    const render = BugsTracking.render;
+    const render = L8Tracking.render;
 
-    BugsTracking.columns = {
+    L8Tracking.columns = {
         Bug: [
             ...col.id('bugId'),
             ...col.col('bugNumber', 'Bug #'),
@@ -39,6 +39,15 @@
             ...col.enum('status', 'Status', null, render.projectStatus),
             ...col.enum('visibility', 'Visibility', null, render.projectVisibility),
             ...col.col('ownerId', 'Owner')
+        ],
+
+        BugsAssignee: [
+            ...col.id('assigneeId'),
+            ...col.col('name', 'Name'),
+            ...col.col('email', 'Email'),
+            ...col.enum('assigneeType', 'Type', null, render.assigneeType),
+            ...col.col('projectId', 'Project'),
+            ...col.col('active', 'Active')
         ]
     };
 })();

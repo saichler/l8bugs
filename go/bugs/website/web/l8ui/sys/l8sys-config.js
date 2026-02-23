@@ -23,6 +23,22 @@ limitations under the License.
 
     // SYS Module Configuration
     L8Sys.modules = {
+        'tracking': {
+            label: 'Tracking',
+            icon: '\uD83D\uDC1B',
+            services: [
+                { key: 'bugs', label: 'Bugs', icon: '\uD83D\uDC1B',
+                  endpoint: '/20/Bug', model: 'Bug',
+                  supportedViews: ['table', 'kanban'] },
+                { key: 'features', label: 'Features', icon: '\u2728',
+                  endpoint: '/20/Feature', model: 'Feature',
+                  supportedViews: ['table', 'kanban'] },
+                { key: 'projects', label: 'Projects', icon: '\uD83D\uDCC1',
+                  endpoint: '/20/Project', model: 'BugsProject' },
+                { key: 'assignees', label: 'Assignees', icon: '\uD83D\uDC64',
+                  endpoint: '/20/Assignee', model: 'BugsAssignee' }
+            ]
+        },
         'health': {
             label: 'Health',
             icon: '💚',
@@ -50,6 +66,6 @@ limitations under the License.
     };
 
     // Sub-module namespaces for service registry
-    L8Sys.submodules = ['L8Security'];
+    L8Sys.submodules = ['L8Security', 'L8Tracking'];
 
 })();

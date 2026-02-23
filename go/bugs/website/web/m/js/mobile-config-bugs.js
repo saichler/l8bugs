@@ -19,19 +19,6 @@ limitations under the License.
 (function() {
     'use strict';
 
-    // Bugs Module Configuration
-    Layer8MConfig.registerModules({
-        'tracking': {
-            label: 'Tracking',
-            icon: 'bugs',
-            services: [
-                { key: 'bugs', label: 'Bugs', icon: 'bugs', endpoint: '/20/Bug', model: 'Bug' },
-                { key: 'features', label: 'Features', icon: 'bugs', endpoint: '/20/Feature', model: 'Feature' },
-                { key: 'projects', label: 'Projects', icon: 'bugs', endpoint: '/20/Project', model: 'BugsProject' }
-            ]
-        }
-    });
-
     // Bugs Reference Registry for mobile picker
     Layer8MConfig.registerReferences({
         BugsProject: {

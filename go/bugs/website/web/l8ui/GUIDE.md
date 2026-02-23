@@ -325,9 +325,17 @@ CSS files first, then JS in strict dependency order:
 <script src="l8ui/sys/security/l8security-users-crud.js"></script>
 <script src="l8ui/sys/security/l8security-roles-crud.js"></script>
 <script src="l8ui/sys/security/l8security-credentials-crud.js"></script>
+<!-- Tracking sub-module -->
+<script src="l8ui/sys/tracking/l8tracking-enums.js"></script>
+<script src="l8ui/sys/tracking/l8tracking-columns.js"></script>
+<script src="l8ui/sys/tracking/l8tracking-forms.js"></script>
+<script src="l8ui/sys/tracking/l8tracking.js"></script>
+<script src="l8ui/sys/tracking/l8tracking-reference.js"></script>
+<!-- Modules sub-module -->
 <script src="l8ui/sys/modules/l8sys-dependency-graph.js"></script>
 <script src="l8ui/sys/modules/l8sys-modules-map.js"></script>
 <script src="l8ui/sys/modules/l8sys-modules.js"></script>
+<script src="l8ui/sys/logs/l8logs.js"></script>
 <script src="l8ui/sys/l8sys-init.js"></script>
 ```
 

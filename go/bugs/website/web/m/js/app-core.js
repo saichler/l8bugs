@@ -19,11 +19,10 @@ limitations under the License.
     'use strict';
 
     const SECTIONS = {
-        'bugs': 'sections/bugs.html',
         'system': 'sections/system.html'
     };
 
-    let currentSection = 'bugs';
+    let currentSection = 'system';
     let sectionCache = {};
 
     window.MobileApp = {
@@ -47,7 +46,7 @@ limitations under the License.
             });
 
             const hash = window.location.hash.slice(1);
-            const section = SECTIONS[hash] ? hash : 'bugs';
+            const section = SECTIONS[hash] ? hash : 'system';
             await this.loadSection(section);
 
             window.addEventListener('hashchange', () => {
@@ -141,11 +140,7 @@ limitations under the License.
                 script.parentNode.replaceChild(newScript, script);
             });
 
-            if (sectionKey === 'bugs') {
-                if (typeof Layer8MNav !== 'undefined') {
-                    Layer8MNav.navigateToModule('bugs');
-                }
-            } else if (sectionKey === 'system') {
+            if (sectionKey === 'system') {
                 if (typeof initMobileSystem === 'function') {
                     initMobileSystem();
                 }

@@ -3,7 +3,7 @@
     const factory = window.Layer8EnumFactory;
     const { createStatusRenderer, renderEnum, renderDate } = Layer8DRenderers;
 
-    window.BugsTracking = window.BugsTracking || {};
+    window.L8Tracking = window.L8Tracking || {};
 
     const BUG_STATUS = factory.create([
         ['Unspecified', null, ''],
@@ -90,7 +90,7 @@
         ['Closed', 'closed', 'layer8d-status-inactive']
     ]);
 
-    BugsTracking.enums = {
+    L8Tracking.enums = {
         BUG_STATUS: BUG_STATUS.enum,
         BUG_STATUS_CLASSES: BUG_STATUS.classes,
         FEATURE_STATUS: FEATURE_STATUS.enum,
@@ -110,7 +110,7 @@
         MILESTONE_STATUS_CLASSES: MILESTONE_STATUS.classes
     };
 
-    BugsTracking.render = {
+    L8Tracking.render = {
         bugStatus: createStatusRenderer(BUG_STATUS.enum, BUG_STATUS.classes),
         featureStatus: createStatusRenderer(FEATURE_STATUS.enum, FEATURE_STATUS.classes),
         priority: createStatusRenderer(PRIORITY.enum, PRIORITY.classes),

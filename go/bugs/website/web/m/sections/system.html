@@ -15,18 +15,30 @@ limitations under the License.
 <div class="section-container" id="system-section">
     <div class="page-header">
         <h1 class="page-title">System Administration</h1>
-        <p class="page-subtitle">Health, Security & Module Settings</p>
+        <p class="page-subtitle">Bug Tracking, Security & System Administration</p>
     </div>
 
     <!-- Module Tabs -->
     <div class="section-tabs">
-        <button class="section-tab active" data-module="health">Health</button>
+        <button class="section-tab active" data-module="tracking">Tracking</button>
+        <button class="section-tab" data-module="health">Health</button>
         <button class="section-tab" data-module="security">Security</button>
         <button class="section-tab" data-module="modules">Modules</button>
     </div>
 
+    <!-- Tracking Content -->
+    <div id="system-tracking-content">
+        <div class="section-tabs" id="tracking-service-tabs">
+            <button class="section-tab active" data-service="bugs">Bugs</button>
+            <button class="section-tab" data-service="features">Features</button>
+            <button class="section-tab" data-service="projects">Projects</button>
+            <button class="section-tab" data-service="assignees">Assignees</button>
+        </div>
+        <div id="system-tracking-table"></div>
+    </div>
+
     <!-- Health Content -->
-    <div id="system-health-content">
+    <div id="system-health-content" style="display:none;">
         <div id="system-health-table"></div>
     </div>
 
@@ -49,8 +61,10 @@ limitations under the License.
 <script>
 var systemHealthTable = null;
 var systemSecurityTable = null;
-var currentSystemModule = 'health';
+var systemTrackingTable = null;
+var currentSystemModule = 'tracking';
 var currentSecurityService = 'users';
+var currentTrackingService = 'bugs';
 var healthRawDataMap = new Map();
 
 var HEALTH_COLUMNS = [
@@ -88,6 +102,45 @@ var SECURITY_SERVICES = {
         idField: 'id',
         columns: [
             { key: 'id', label: 'ID', primary: true, filterKey: 'id' },
+            { key: 'name', label: 'Name', secondary: true, filterKey: 'name' }
+        ]
+    }
+};
+
+var TRACKING_SERVICES = {
+    bugs: {
+        endpoint: Layer8MConfig.resolveEndpoint('/20/Bug'),
+        modelName: 'Bug',
+        idField: 'bugId',
+        columns: (window.MobileL8Tracking && MobileL8Tracking.columns) ? MobileL8Tracking.columns.Bug : [
+            { key: 'bugId', label: 'Bug ID', primary: true, filterKey: 'bugId' },
+            { key: 'title', label: 'Title', secondary: true, filterKey: 'title' }
+        ]
+    },
+    features: {
+        endpoint: Layer8MConfig.resolveEndpoint('/20/Feature'),
+        modelName: 'Feature',
+        idField: 'featureId',
+        columns: (window.MobileL8Tracking && MobileL8Tracking.columns) ? MobileL8Tracking.columns.Feature : [
+            { key: 'featureId', label: 'Feature ID', primary: true, filterKey: 'featureId' },
+            { key: 'title', label: 'Title', secondary: true, filterKey: 'title' }
+        ]
+    },
+    projects: {
+        endpoint: Layer8MConfig.resolveEndpoint('/20/Project'),
+        modelName: 'BugsProject',
+        idField: 'projectId',
+        columns: (window.MobileL8Tracking && MobileL8Tracking.columns) ? MobileL8Tracking.columns.BugsProject : [
+            { key: 'projectId', label: 'Project ID', primary: true, filterKey: 'projectId' },
+            { key: 'name', label: 'Name', secondary: true, filterKey: 'name' }
+        ]
+    },
+    assignees: {
+        endpoint: Layer8MConfig.resolveEndpoint('/20/Assignee'),
+        modelName: 'BugsAssignee',
+        idField: 'assigneeId',
+        columns: (window.MobileL8Tracking && MobileL8Tracking.columns) ? MobileL8Tracking.columns.BugsAssignee : [
+            { key: 'assigneeId', label: 'Assignee ID', primary: true, filterKey: 'assigneeId' },
             { key: 'name', label: 'Name', secondary: true, filterKey: 'name' }
         ]
     }
@@ -134,8 +187,25 @@ function transformHealthItem(item) {
     };
 }
 
+function loadTrackingService(serviceName) {
+    currentTrackingService = serviceName;
+    var config = TRACKING_SERVICES[serviceName];
+    var forms = (window.MobileL8Tracking && MobileL8Tracking.forms) ? MobileL8Tracking.forms : {};
+    var primaryKeys = (window.MobileL8Tracking && MobileL8Tracking.primaryKeys) ? MobileL8Tracking.primaryKeys : {};
+
+    systemTrackingTable = new Layer8MEditTable('system-tracking-table', {
+        endpoint: config.endpoint,
+        modelName: config.modelName,
+        columns: config.columns,
+        rowsPerPage: 15,
+        getItemId: function(item) { return item[config.idField]; },
+        formDefinition: forms[config.modelName],
+        primaryKey: primaryKeys[config.modelName] || config.idField
+    });
+}
+
 function initMobileSystem() {
-    loadSystemHealth();
+    loadTrackingService('bugs');
 
     document.querySelectorAll('#system-section > .section-tabs .section-tab').forEach(function(tab) {
         tab.addEventListener('click', function() {
@@ -156,19 +226,34 @@ function initMobileSystem() {
             loadSecurityService(tab.dataset.service);
         });
     });
+
+    document.querySelectorAll('#tracking-service-tabs .section-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('#tracking-service-tabs .section-tab').forEach(function(t) {
+                t.classList.remove('active');
+            });
+            tab.classList.add('active');
+            loadTrackingService(tab.dataset.service);
+        });
+    });
 }
 
 function switchSystemModule(moduleKey) {
     currentSystemModule = moduleKey;
+    var trackingContent = document.getElementById('system-tracking-content');
     var healthContent = document.getElementById('system-health-content');
     var securityContent = document.getElementById('system-security-content');
     var modulesContent = document.getElementById('system-modules-content');
 
+    trackingContent.style.display = 'none';
     healthContent.style.display = 'none';
     securityContent.style.display = 'none';
     modulesContent.style.display = 'none';
 
-    if (moduleKey === 'health') {
+    if (moduleKey === 'tracking') {
+        trackingContent.style.display = '';
+        loadTrackingService(currentTrackingService);
+    } else if (moduleKey === 'health') {
         healthContent.style.display = '';
         loadSystemHealth();
     } else if (moduleKey === 'security') {

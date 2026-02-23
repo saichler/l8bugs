@@ -161,7 +161,21 @@ A feature request describing new functionality.
 | related_bug_ids | repeated string | Related bugs |
 | audit_info | erp.AuditInfo | Standard audit metadata |
 
-### 3.4 Sprint
+### 3.4 Assignee
+
+An assignee represents a person or AI agent who can be assigned to bugs and features.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| assignee_id | string | Primary key |
+| name | string | Display name |
+| email | string | Contact email |
+| assignee_type | AssigneeType | Human, AI_Agent |
+| project_id | string | Reference to Project (optional scope) |
+| active | bool | Whether the assignee is available |
+| audit_info | erp.AuditInfo | Standard audit metadata |
+
+### 3.5 Sprint
 
 A time-boxed iteration for organizing work.
 
@@ -667,6 +681,7 @@ L8Bugs uses **ServiceArea = 20**. All services share this area. (L8ERP uses 30-1
 | Service | ServiceName (max 10 chars) | Model | PrimaryKey |
 |---------|---------------------------|-------|------------|
 | Projects | Project | BugsProject | ProjectId |
+| Assignees | Assignee | BugsAssignee | AssigneeId |
 | Bugs | Bug | Bug | BugId |
 | Features | Feature | Feature | FeatureId |
 | Sprints | Sprint | BugsSprint | SprintId |
@@ -704,31 +719,43 @@ l8bugs/
 │   │   ├── features/                 # FeatureService.go + FeatureServiceCallback.go
 │   │   ├── sprints/                  # SprintService.go + SprintServiceCallback.go (Phase 2)
 │   │   └── website/web/              # UI assets
-│   │       ├── app.html              # Desktop entry point
+│   │       ├── app.html              # Desktop entry point (single "System" sidebar section)
 │   │       ├── js/
-│   │       │   ├── sections.js       # Section loader + initializers
-│   │       │   └── reference-registry-bugs.js
+│   │       │   ├── sections.js       # Section loader (system only)
+│   │       │   └── app.js            # App bootstrap
 │   │       ├── sections/
-│   │       │   └── bugs.html         # Section placeholder (Layer8SectionGenerator)
-│   │       ├── bugs/                 # Module UI config files
-│   │       │   ├── bugs-config.js    # Layer8ModuleConfigFactory.create()
-│   │       │   ├── bugs-section-config.js
-│   │       │   ├── bugs-init.js      # Layer8DModuleFactory.create() (~10 lines)
-│   │       │   ├── bugs.css          # Module accent color
-│   │       │   └── tracking/         # Submodule: bugs + features
-│   │       │       ├── tracking-enums.js
-│   │       │       ├── tracking-columns.js
-│   │       │       └── tracking-forms.js
+│   │       │   └── system.html       # System section (Tracking, Health, Security, Modules, Logs)
 │   │       ├── m/                    # Mobile UI
 │   │       │   ├── app.html
-│   │       │   └── js/bugs/
-│   │       │       ├── tracking-enums.js
-│   │       │       ├── tracking-columns.js
-│   │       │       ├── tracking-forms.js
-│   │       │       └── bugs-index.js  # Layer8MModuleRegistry.create()
-│   │       └── l8ui/                 # Shared component library (already exists)
+│   │       │   ├── sections/
+│   │       │   │   └── system.html   # Mobile system section (Tracking, Health, Security, Modules)
+│   │       │   └── js/
+│   │       │       ├── tracking/     # Mobile tracking data files
+│   │       │       │   ├── l8tracking-enums.js     # MobileL8Tracking namespace
+│   │       │       │   ├── l8tracking-columns.js
+│   │       │       │   ├── l8tracking-forms.js
+│   │       │       │   └── layer8m-reference-registry-tracking.js
+│   │       │       ├── app-core.js
+│   │       │       ├── mobile-config-bugs.js       # Reference picker config
+│   │       │       └── layer8m-nav-config-bugs.js  # Nav config (system only)
+│   │       └── l8ui/                 # Shared component library
+│   │           └── sys/
+│   │               ├── l8sys-config.js     # System module config (tracking + security)
+│   │               ├── l8sys-init.js       # System module init
+│   │               ├── tracking/           # Generic tracking sub-module (l8ui component)
+│   │               │   ├── l8tracking-enums.js     # L8Tracking namespace
+│   │               │   ├── l8tracking-columns.js
+│   │               │   ├── l8tracking-forms.js
+│   │               │   ├── l8tracking.js           # Verification entry point
+│   │               │   └── l8tracking-reference.js # Reference registry
+│   │               ├── security/           # Security sub-module
+│   │               ├── health/             # Health sub-module
+│   │               ├── modules/            # Modules sub-module
+│   │               └── logs/               # Logs sub-module
 │   └── tests/mocks/                  # Mock data generation (Phase 2+)
 ```
+
+**Note:** Bug Tracking is not a standalone sidebar section. It is integrated into the System section as the "Tracking" sub-module tab (the default tab), alongside Health, Security, Modules, and Logs. The tracking data files live under `l8ui/sys/tracking/` as a generic l8ui component, following the same pattern as `l8ui/sys/security/`.
 
 ### Shared Proto Dependency
 
@@ -844,63 +871,78 @@ func registerBugsTypes(resources ifs.IResources) {
 }
 ```
 
-### Desktop UI Config Pattern (following l8erp)
+### Desktop UI Config Pattern (System Section Integration)
+
+Bug Tracking is configured as a sub-module of the System section in `l8ui/sys/l8sys-config.js`, not as a standalone module. The tracking data files (`l8tracking-enums.js`, `l8tracking-columns.js`, `l8tracking-forms.js`) follow the same pattern as `l8ui/sys/security/` — they are generic l8ui components reusable by any Layer8 app.
 
 ```javascript
-// bugs/bugs-config.js
-Layer8ModuleConfigFactory.create({
-    namespace: 'Bugs',
-    modules: {
-        'tracking': {
-            label: 'Tracking',
-            icon: '🐛',
-            services: [
-                { key: 'bugs', label: 'Bugs', icon: '🐛',
-                  endpoint: '/20/Bug', model: 'Bug',
-                  supportedViews: ['table', 'kanban'] },
-                { key: 'features', label: 'Features', icon: '✨',
-                  endpoint: '/20/Feature', model: 'Feature',
-                  supportedViews: ['table', 'kanban'] },
-                { key: 'projects', label: 'Projects', icon: '📁',
-                  endpoint: '/20/Project', model: 'BugsProject' }
-            ]
-        }
+// l8ui/sys/l8sys-config.js — tracking is the FIRST module (default tab)
+L8Sys.modules = {
+    tracking: {
+        label: 'Tracking', icon: '🐛',
+        services: [
+            { key: 'bugs', label: 'Bugs', icon: '🐛',
+              endpoint: '/20/Bug', model: 'Bug',
+              supportedViews: ['table', 'kanban'] },
+            { key: 'features', label: 'Features', icon: '✨',
+              endpoint: '/20/Feature', model: 'Feature',
+              supportedViews: ['table', 'kanban'] },
+            { key: 'projects', label: 'Projects', icon: '📁',
+              endpoint: '/20/Project', model: 'BugsProject' }
+        ]
     },
-    submodules: ['Tracking']
-});
+    health: { ... },
+    security: { ... },
+    modules: { ... },
+    logs: { ... }
+};
+L8Sys.submodules = ['L8Security', 'L8Tracking'];
 ```
 
 ```javascript
-// bugs/bugs-init.js (~10 lines)
+// l8ui/sys/l8sys-init.js — defaults to tracking tab
 Layer8DModuleFactory.create({
-    namespace: 'Bugs',
+    namespace: 'L8Sys',
     defaultModule: 'tracking',
     defaultService: 'bugs',
     sectionSelector: 'tracking',       // MUST match defaultModule
-    initializerName: 'initializeBugs',
-    requiredNamespaces: ['Tracking']
+    initializerName: 'initializeL8Sys',
+    requiredNamespaces: ['L8Security', 'L8Tracking']
 });
 ```
 
-### Section HTML Pattern (following l8erp)
+### Section HTML Pattern
+
+The System section (`sections/system.html`) contains static HTML with module tabs (Tracking, Health, Security, Modules, Logs). Tracking is the first/active tab with subnav for Bugs, Features, and Projects.
 
 ```html
-<!-- sections/bugs.html -->
-<div id="bugs-section-placeholder"></div>
-<script>
-    (function() {
-        const placeholder = document.getElementById('bugs-section-placeholder');
-        if (placeholder && window.Layer8SectionGenerator) {
-            placeholder.outerHTML = Layer8SectionGenerator.generate('bugs');
-        }
-    })();
-</script>
+<!-- sections/system.html (relevant excerpt) -->
+<div class="l8-module-tabs">
+    <button class="l8-module-tab active" data-module="tracking">
+        <span class="tab-icon">🐛</span><span class="tab-label">Tracking</span>
+    </button>
+    <button class="l8-module-tab" data-module="health">...</button>
+    <button class="l8-module-tab" data-module="security">...</button>
+    <!-- ... -->
+</div>
+<div class="l8-module-content active" data-module="tracking">
+    <nav class="l8-subnav">
+        <a class="l8-subnav-item active" data-service="bugs">Bugs</a>
+        <a class="l8-subnav-item" data-service="features">Features</a>
+        <a class="l8-subnav-item" data-service="projects">Projects</a>
+    </nav>
+    <!-- Container IDs follow {moduleKey}-{serviceKey}-table-container -->
+    <div class="l8-service-view active" data-service="bugs">
+        <div class="l8-table-container" id="tracking-bugs-table-container"></div>
+    </div>
+    <!-- ... -->
+</div>
 ```
 
-### Reference Registry Pattern (following l8erp)
+### Reference Registry Pattern
 
 ```javascript
-// js/reference-registry-bugs.js
+// l8ui/sys/tracking/l8tracking-reference.js
 const ref = window.Layer8RefFactory;
 Layer8DReferenceRegistry.register({
     ...ref.simple('BugsProject', 'projectId', 'name', 'Project'),
@@ -915,28 +957,29 @@ Layer8DReferenceRegistry.register({
 
 ## 14. Implementation Phases
 
-### Phase 1: Foundation
+### Phase 1: Foundation ✅ Complete
 1. **Proto**: Define `bugs.proto` with all Prime Object messages, embedded child types, enums, and List types. Update `make-bindings.sh` and generate Go types.
 2. **Go services**: Implement Project, Bug, Feature services following l8erp pattern:
    - `*Service.go` (Activate, ServiceName, ServiceArea=20)
    - `*ServiceCallback.go` (GenerateID on POST, validate chain)
    - Type registration in `main.go`
-3. **Desktop UI config** (configuration data only, no behavioral code):
-   - `bugs-config.js` — `Layer8ModuleConfigFactory.create()`
-   - `bugs-section-config.js` — section metadata for `Layer8SectionGenerator`
-   - `tracking-enums.js` — `Layer8EnumFactory` calls for all enums
-   - `tracking-columns.js` — `Layer8ColumnFactory` calls (field names verified against .pb.go)
-   - `tracking-forms.js` — `Layer8FormFactory` calls (Comment as `f.inlineTable()` in Bug/Feature; Label, Component, Milestone as `f.inlineTable()` in Project)
-   - `bugs-init.js` — `Layer8DModuleFactory.create()` (~10 lines)
-   - `sections/bugs.html` — placeholder for `Layer8SectionGenerator`
-   - `reference-registry-bugs.js` — `Layer8RefFactory` registrations
-   - `bugs.css` — module accent color
-   - `app.html` — add CSS + script includes in correct order
-   - `sections.js` — add section mapping + initializer
-4. **Mobile UI config** (per Mobile Parity rule):
-   - `m/js/bugs/tracking-enums.js`, `tracking-columns.js`, `tracking-forms.js`
-   - `m/js/bugs/bugs-index.js` — `Layer8MModuleRegistry.create()`
-   - Mobile reference registry, nav config, `m/app.html` updates
+3. **Desktop UI** — Tracking integrated into System section as generic l8ui component:
+   - `l8ui/sys/l8sys-config.js` — tracking added as first module with 3 services (bugs, features, projects)
+   - `l8ui/sys/tracking/l8tracking-enums.js` — `Layer8EnumFactory` calls for all enums (`L8Tracking` namespace)
+   - `l8ui/sys/tracking/l8tracking-columns.js` — `Layer8ColumnFactory` calls (field names verified against .pb.go)
+   - `l8ui/sys/tracking/l8tracking-forms.js` — `Layer8FormFactory` calls (Comment as `f.inlineTable()` in Bug/Feature; Label, Component, Milestone as `f.inlineTable()` in Project)
+   - `l8ui/sys/tracking/l8tracking.js` — verification entry point
+   - `l8ui/sys/tracking/l8tracking-reference.js` — `Layer8RefFactory` registrations
+   - `l8ui/sys/l8sys-init.js` — defaults to tracking tab, `requiredNamespaces: ['L8Security', 'L8Tracking']`
+   - `sections/system.html` — Tracking tab (active) with Bugs/Features/Projects subnav
+   - `app.html` — single "System" sidebar section, tracking scripts in SYS Module block
+   - `js/sections.js` — system section only
+4. **Mobile UI** (per Mobile Parity rule):
+   - `m/js/tracking/l8tracking-enums.js`, `l8tracking-columns.js`, `l8tracking-forms.js` (`MobileL8Tracking` namespace)
+   - `m/js/tracking/layer8m-reference-registry-tracking.js` — mobile reference registry
+   - `m/sections/system.html` — Tracking tab (active) with service sub-tabs and inline `loadTrackingService()` function
+   - `m/app.html` — single "System" sidebar section, tracking scripts
+   - `m/js/app-core.js` — defaults to system section
 
 ### Phase 2: Workflow & Core Features
 - Implement Sprint Go service (with desktop + mobile config files). Label, Component, and Milestone are already available as embedded children of Project from Phase 1 — displayed via `f.inlineTable()` in the Project form.

@@ -1,29 +1,11 @@
-/*
-© 2025 Sharon Aicler (saichler@gmail.com)
-
-Layer 8 Ecosystem is licensed under the Apache License, Version 2.0.
-You may obtain a copy of the License at:
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-/**
- * Mobile Bugs Tracking Module - Form Definitions
- * Desktop Equivalent: bugs/tracking/tracking-forms.js
- */
 (function() {
     'use strict';
-    window.MobileBugsTracking = window.MobileBugsTracking || {};
+    window.L8Tracking = window.L8Tracking || {};
 
     const f = window.Layer8FormFactory;
-    const enums = MobileBugsTracking.enums;
+    const enums = L8Tracking.enums;
 
-    MobileBugsTracking.forms = {
+    L8Tracking.forms = {
         Bug: f.form('Bug', [
             f.section('Bug Details', [
                 ...f.text('bugNumber', 'Bug #'),
@@ -40,7 +22,7 @@ limitations under the License.
                 ...f.textarea('actualBehavior', 'Actual Behavior')
             ]),
             f.section('Assignment', [
-                ...f.text('assigneeId', 'Assignee'),
+                ...f.reference('assigneeId', 'Assignee', 'BugsAssignee'),
                 ...f.select('assigneeType', 'Assignee Type', enums.ASSIGNEE_TYPE),
                 ...f.text('reporterId', 'Reporter'),
                 ...f.text('component', 'Component'),
@@ -107,7 +89,7 @@ limitations under the License.
                 ...f.textarea('acceptanceCriteria', 'Acceptance Criteria')
             ]),
             f.section('Assignment', [
-                ...f.text('assigneeId', 'Assignee'),
+                ...f.reference('assigneeId', 'Assignee', 'BugsAssignee'),
                 ...f.select('assigneeType', 'Assignee Type', enums.ASSIGNEE_TYPE),
                 ...f.text('reporterId', 'Reporter'),
                 ...f.text('component', 'Component'),
@@ -151,6 +133,16 @@ limitations under the License.
             ])
         ]),
 
+        BugsAssignee: f.form('Assignee', [
+            f.section('Assignee Details', [
+                ...f.text('name', 'Name', true),
+                ...f.text('email', 'Email'),
+                ...f.select('assigneeType', 'Type', enums.ASSIGNEE_TYPE),
+                ...f.reference('projectId', 'Project', 'BugsProject'),
+                ...f.checkbox('active', 'Active')
+            ])
+        ]),
+
         BugsProject: f.form('Project', [
             f.section('Project Details', [
                 ...f.text('name', 'Name', true),
@@ -189,5 +181,12 @@ limitations under the License.
                 ])
             ])
         ])
+    };
+
+    L8Tracking.primaryKeys = {
+        Bug: 'bugId',
+        Feature: 'featureId',
+        BugsProject: 'projectId',
+        BugsAssignee: 'assigneeId'
     };
 })();

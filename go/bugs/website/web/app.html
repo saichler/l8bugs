@@ -30,8 +30,6 @@
     <link rel="stylesheet" href="l8ui/wizard/layer8d-wizard.css">
     <link rel="stylesheet" href="l8ui/dashboard/layer8d-widget.css">
     <link rel="stylesheet" href="l8ui/shared/layer8-view-switcher.css">
-    <!-- Bugs Module Styles -->
-    <link rel="stylesheet" href="bugs/bugs.css">
     <!-- SYS Module Styles -->
     <link rel="stylesheet" href="l8ui/sys/l8sys.css">
     <link rel="stylesheet" href="l8ui/sys/health/l8health.css">
@@ -106,11 +104,7 @@
         <!-- Navigation Sidebar -->
         <nav class="sidebar">
             <ul class="nav-menu">
-                <li><a href="#" data-section="bugs" class="nav-link active">
-                    <span class="nav-icon">&#x1F41B;</span>
-                    <span>Bug Tracking</span>
-                </a></li>
-                <li><a href="#" data-section="system" class="nav-link">
+                <li><a href="#" data-section="system" class="nav-link active">
                     <span class="nav-icon">&#x2699;&#xFE0F;</span>
                     <span>System</span>
                 </a></li>
@@ -142,8 +136,7 @@
     <script src="l8ui/shared/layer8-svg-factory.js"></script>
     <script src="l8ui/shared/layer8d-module-config-factory.js"></script>
     <script src="l8ui/shared/layer8-section-generator.js"></script>
-    <!-- Reference Registry -->
-    <script src="js/reference-registry-bugs.js"></script>
+    <!-- Reference Registry (loaded via l8ui/sys/tracking/l8tracking-reference.js) -->
     <!-- Notification Component (load before forms) -->
     <script src="l8ui/notification/layer8d-notification.js"></script>
     <!-- Input Formatter Component (load in order, before forms) -->
@@ -220,13 +213,6 @@
     <script src="l8ui/shared/layer8d-toggle-tree.js"></script>
     <script src="l8ui/shared/layer8d-module-filter.js"></script>
     <script src="l8ui/shared/layer8d-module-factory.js"></script>
-    <!-- BUGS Module -->
-    <script src="bugs/bugs-section-config.js"></script>
-    <script src="bugs/bugs-config.js"></script>
-    <script src="bugs/tracking/tracking-enums.js"></script>
-    <script src="bugs/tracking/tracking-columns.js"></script>
-    <script src="bugs/tracking/tracking-forms.js"></script>
-    <script src="bugs/bugs-init.js"></script>
     <!-- SYS Module -->
     <script src="l8ui/sys/l8sys-config.js"></script>
     <script src="l8ui/sys/health/l8health.js"></script>
@@ -237,6 +223,13 @@
     <script src="l8ui/sys/security/l8security-users-crud.js"></script>
     <script src="l8ui/sys/security/l8security-roles-crud.js"></script>
     <script src="l8ui/sys/security/l8security-credentials-crud.js"></script>
+    <!-- Tracking sub-module -->
+    <script src="l8ui/sys/tracking/l8tracking-enums.js"></script>
+    <script src="l8ui/sys/tracking/l8tracking-columns.js"></script>
+    <script src="l8ui/sys/tracking/l8tracking-forms.js"></script>
+    <script src="l8ui/sys/tracking/l8tracking.js"></script>
+    <script src="l8ui/sys/tracking/l8tracking-reference.js"></script>
+    <!-- Modules sub-module -->
     <script src="l8ui/sys/modules/l8sys-dependency-graph.js"></script>
     <script src="l8ui/sys/modules/l8sys-modules-map.js"></script>
     <script src="l8ui/sys/modules/l8sys-modules.js"></script>

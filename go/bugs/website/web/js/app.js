@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         Layer8DModuleFilter._loaded = true;
     }
 
-    loadSection('bugs');
+    loadSection('system');
 
     const navLinks = document.querySelectorAll('.nav-link');
     navLinks.forEach(link => {

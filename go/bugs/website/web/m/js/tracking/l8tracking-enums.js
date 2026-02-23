@@ -13,8 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 /**
- * Mobile Bugs Tracking Module - Enum Definitions using Layer8EnumFactory
- * Desktop Equivalent: bugs/tracking/tracking-enums.js
+ * Mobile L8Tracking Module - Enum Definitions using Layer8EnumFactory
+ * Desktop Equivalent: l8ui/sys/tracking/l8tracking-enums.js
  */
 (function() {
     'use strict';
@@ -22,7 +22,7 @@ limitations under the License.
     const factory = window.Layer8EnumFactory;
     const { createStatusRenderer, renderEnum, renderDate } = Layer8MRenderers;
 
-    window.MobileBugsTracking = window.MobileBugsTracking || {};
+    window.MobileL8Tracking = window.MobileL8Tracking || {};
 
     const BUG_STATUS = factory.create([
         ['Unspecified', null, ''],
@@ -109,7 +109,7 @@ limitations under the License.
         ['Closed', 'closed', 'status-inactive']
     ]);
 
-    MobileBugsTracking.enums = {
+    MobileL8Tracking.enums = {
         BUG_STATUS: BUG_STATUS.enum,
         BUG_STATUS_VALUES: BUG_STATUS.values,
         BUG_STATUS_CLASSES: BUG_STATUS.classes,
@@ -136,7 +136,7 @@ limitations under the License.
         MILESTONE_STATUS_CLASSES: MILESTONE_STATUS.classes
     };
 
-    MobileBugsTracking.render = {
+    MobileL8Tracking.render = {
         bugStatus: createStatusRenderer(BUG_STATUS.enum, BUG_STATUS.classes),
         featureStatus: createStatusRenderer(FEATURE_STATUS.enum, FEATURE_STATUS.classes),
         priority: createStatusRenderer(PRIORITY.enum, PRIORITY.classes),

@@ -216,6 +216,25 @@ message BugsProjectList {
 }
 
 // ============================================================================
+// Prime Object: Assignee
+// ============================================================================
+
+message BugsAssignee {
+    string assignee_id = 1;
+    string name = 2;
+    string email = 3;
+    AssigneeType assignee_type = 4;
+    string project_id = 5;
+    bool active = 6;
+    erp.AuditInfo audit_info = 30;
+}
+
+message BugsAssigneeList {
+    repeated BugsAssignee list = 1;
+    l8api.L8MetaData metadata = 2;
+}
+
+// ============================================================================
 // Prime Object: Bug
 // ============================================================================
 
