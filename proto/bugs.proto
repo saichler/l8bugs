@@ -119,6 +119,15 @@ enum MilestoneStatus {
     MILESTONE_STATUS_CLOSED = 2;
 }
 
+enum TriageStatus {
+    TRIAGE_STATUS_UNSPECIFIED = 0;
+    TRIAGE_STATUS_PENDING = 1;
+    TRIAGE_STATUS_IN_PROGRESS = 2;
+    TRIAGE_STATUS_COMPLETED = 3;
+    TRIAGE_STATUS_FAILED = 4;
+    TRIAGE_STATUS_SKIPPED = 5;
+}
+
 // ============================================================================
 // Embedded Child Messages (no List types, no services)
 // ============================================================================
@@ -274,6 +283,10 @@ message Bug {
     int32 vote_count = 33;
     int32 watcher_count = 34;
     int64 created_date = 35;
+    Severity ai_suggested_severity = 36;
+    string ai_suggested_assignee_id = 37;
+    TriageStatus triage_status = 38;
+    string triage_error = 39;
     repeated Comment comments = 40;
     repeated Attachment attachments = 41;
     repeated ActivityEntry activity = 42;
@@ -319,6 +332,10 @@ message Feature {
     int32 vote_count = 24;
     int32 watcher_count = 25;
     int64 created_date = 26;
+    string ai_suggested_component = 27;
+    string ai_suggested_assignee_id = 28;
+    TriageStatus triage_status = 29;
+    string triage_error = 30;
     repeated Comment comments = 40;
     repeated Attachment attachments = 41;
     repeated ActivityEntry activity = 42;

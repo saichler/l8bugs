@@ -35,6 +35,8 @@ limitations under the License.
             ...col.col('assigneeId', 'Assignee'),
             ...col.col('component', 'Component'),
             ...col.enum('resolution', 'Resolution', enums.RESOLUTION_VALUES, render.resolution),
+            ...col.enum('triageStatus', 'AI Triage', enums.TRIAGE_STATUS_VALUES, render.triageStatus),
+            ...col.col('aiConfidence', 'AI Conf.'),
             ...col.date('createdDate', 'Created'),
             ...col.date('resolvedDate', 'Resolved')
         ],
@@ -48,6 +50,8 @@ limitations under the License.
             ...col.col('assigneeId', 'Assignee'),
             ...col.col('component', 'Component'),
             ...col.col('targetVersion', 'Target Version'),
+            ...col.enum('triageStatus', 'AI Triage', enums.TRIAGE_STATUS_VALUES, render.triageStatus),
+            ...col.col('aiConfidence', 'AI Conf.'),
             ...col.date('createdDate', 'Created')
         ],
 

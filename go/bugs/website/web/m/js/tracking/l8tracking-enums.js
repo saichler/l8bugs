@@ -116,6 +116,15 @@ limitations under the License.
         ['Completed', 'completed', 'status-inactive']
     ]);
 
+    const TRIAGE_STATUS = factory.create([
+        ['Unspecified', null, ''],
+        ['Pending', 'pending', 'status-pending'],
+        ['In Progress', 'in-progress', 'status-active'],
+        ['Completed', 'completed', 'status-active'],
+        ['Failed', 'failed', 'status-terminated'],
+        ['Skipped', 'skipped', 'status-inactive']
+    ]);
+
     MobileL8Tracking.enums = {
         BUG_STATUS: BUG_STATUS.enum,
         BUG_STATUS_VALUES: BUG_STATUS.values,
@@ -143,7 +152,10 @@ limitations under the License.
         MILESTONE_STATUS_CLASSES: MILESTONE_STATUS.classes,
         SPRINT_STATUS: SPRINT_STATUS.enum,
         SPRINT_STATUS_VALUES: SPRINT_STATUS.values,
-        SPRINT_STATUS_CLASSES: SPRINT_STATUS.classes
+        SPRINT_STATUS_CLASSES: SPRINT_STATUS.classes,
+        TRIAGE_STATUS: TRIAGE_STATUS.enum,
+        TRIAGE_STATUS_VALUES: TRIAGE_STATUS.values,
+        TRIAGE_STATUS_CLASSES: TRIAGE_STATUS.classes
     };
 
     MobileL8Tracking.render = {
@@ -157,6 +169,7 @@ limitations under the License.
         projectVisibility: renderEnum(PROJECT_VISIBILITY.enum),
         milestoneStatus: createStatusRenderer(MILESTONE_STATUS.enum, MILESTONE_STATUS.classes),
         sprintStatus: createStatusRenderer(SPRINT_STATUS.enum, SPRINT_STATUS.classes),
+        triageStatus: createStatusRenderer(TRIAGE_STATUS.enum, TRIAGE_STATUS.classes),
         date: renderDate
     };
 })();

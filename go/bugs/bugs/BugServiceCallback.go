@@ -2,6 +2,7 @@ package bugs
 
 import (
 	"github.com/saichler/l8bugs/go/bugs/common"
+	"github.com/saichler/l8bugs/go/bugs/triage"
 	l8bugs "github.com/saichler/l8bugs/go/types/l8bugs"
 	"github.com/saichler/l8types/go/ifs"
 )
@@ -34,6 +35,17 @@ func newBugServiceCallback() ifs.IServiceCallback {
 				4: "In Review", 5: "Resolved", 6: "Closed", 7: "Reopened",
 				8: "Won't Fix", 9: "Duplicate", 10: "Cannot Reproduce",
 			},
+		}).
+		After(func(entity *l8bugs.Bug, action ifs.Action, _ ifs.IVNic) error {
+			if action != ifs.POST {
+				return nil
+			}
+			t := triage.Get()
+			if t == nil || !t.Available() {
+				return nil
+			}
+			go t.TriageBug(entity)
+			return nil
 		}).
 		Build()
 }

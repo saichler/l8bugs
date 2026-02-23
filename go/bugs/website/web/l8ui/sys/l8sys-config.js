@@ -69,7 +69,12 @@ limitations under the License.
                 { key: 'assignees', label: 'Assignees', icon: '\uD83D\uDC64',
                   endpoint: '/20/Assignee', model: 'BugsAssignee' },
                 { key: 'sprints', label: 'Sprints', icon: '\uD83C\uDFC3',
-                  endpoint: '/20/Sprint', model: 'BugsSprint' }
+                  endpoint: '/20/Sprint', model: 'BugsSprint' },
+                { key: 'triage', label: 'Triage Inbox', icon: '\uD83E\uDD16',
+                  endpoint: '/20/Bug', model: 'Bug',
+                  supportedViews: ['table'],
+                  defaultFilter: { triageStatus: 3, status: 1 }
+                }
             ]
         },
         'health': {

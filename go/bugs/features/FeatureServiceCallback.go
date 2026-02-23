@@ -2,6 +2,7 @@ package features
 
 import (
 	"github.com/saichler/l8bugs/go/bugs/common"
+	"github.com/saichler/l8bugs/go/bugs/triage"
 	l8bugs "github.com/saichler/l8bugs/go/types/l8bugs"
 	"github.com/saichler/l8types/go/ifs"
 )
@@ -35,6 +36,17 @@ func newFeatureServiceCallback() ifs.IServiceCallback {
 				4: "In Progress", 5: "In Review", 6: "Done", 7: "Closed",
 				8: "Rejected", 9: "Deferred",
 			},
+		}).
+		After(func(entity *l8bugs.Feature, action ifs.Action, _ ifs.IVNic) error {
+			if action != ifs.POST {
+				return nil
+			}
+			t := triage.Get()
+			if t == nil || !t.Available() {
+				return nil
+			}
+			go t.TriageFeature(entity)
+			return nil
 		}).
 		Build()
 }

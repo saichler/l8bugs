@@ -35,10 +35,14 @@
                 ...f.text('fixVersion', 'Fix Version')
             ]),
             f.section('AI Analysis', [
+                ...f.select('triageStatus', 'Triage Status', enums.TRIAGE_STATUS),
                 ...f.number('aiConfidence', 'AI Confidence'),
                 ...f.select('aiSuggestedPriority', 'AI Suggested Priority', enums.PRIORITY),
+                ...f.select('aiSuggestedSeverity', 'AI Suggested Severity', enums.SEVERITY),
                 ...f.text('aiSuggestedComponent', 'AI Suggested Component'),
-                ...f.textarea('aiRootCause', 'AI Root Cause')
+                ...f.reference('aiSuggestedAssigneeId', 'AI Suggested Assignee', 'BugsAssignee'),
+                ...f.textarea('aiRootCause', 'AI Root Cause'),
+                ...f.text('triageError', 'Triage Error')
             ]),
             f.section('Resolution', [
                 ...f.select('resolution', 'Resolution', enums.RESOLUTION),
@@ -115,9 +119,13 @@
                 ...f.number('watcherCount', 'Watchers')
             ]),
             f.section('AI Analysis', [
+                ...f.select('triageStatus', 'Triage Status', enums.TRIAGE_STATUS),
                 ...f.number('aiConfidence', 'AI Confidence'),
                 ...f.select('aiSuggestedPriority', 'AI Suggested Priority', enums.PRIORITY),
-                ...f.textarea('aiBreakdown', 'AI Breakdown')
+                ...f.text('aiSuggestedComponent', 'AI Suggested Component'),
+                ...f.reference('aiSuggestedAssigneeId', 'AI Suggested Assignee', 'BugsAssignee'),
+                ...f.textarea('aiBreakdown', 'AI Breakdown'),
+                ...f.text('triageError', 'Triage Error')
             ]),
             f.section('Links', [
                 ...f.text('linkedPrUrl', 'Linked PR URL'),

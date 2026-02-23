@@ -989,12 +989,20 @@ Layer8DReferenceRegistry.register({
 - ✓ Sprint service registered in type system, activated in service bootstrap
 - ✓ Desktop + mobile UI complete: config, HTML, enums, columns, forms, reference registry
 
-### Phase 3: AI Triage
+### Phase 3: AI Triage ✓
 - AI classification (bug vs. feature, priority, severity, component)
 - Duplicate detection via semantic similarity
 - Related issue surfacing
 - Triage inbox UI
 - AI confidence scoring
+
+**Completed:**
+- ✓ Protobuf additions: TriageStatus enum, ai_suggested_severity/assignee_id/triage_status/triage_error fields on Bug and Feature
+- ✓ Triage Go package: thin Anthropic HTTP client (client.go), prompt templates (prompts.go), JSON parser (parser.go), orchestrator (triage.go), context fetchers (context.go)
+- ✓ After hook extended to fire on POST; Bug and Feature callbacks spawn async triage goroutine on creation
+- ✓ Triage initialized on service startup via triage.Initialize(nic)
+- ✓ Desktop UI: TRIAGE_STATUS enum, triage columns in Bug/Feature tables, expanded AI Analysis form sections, Triage Inbox subnav + service view
+- ✓ Mobile UI: TRIAGE_STATUS enum, triage columns, expanded AI Analysis forms, Triage tab + TRACKING_SERVICES entry
 
 ### Phase 4: AI Agent Integration
 - MCP server implementation

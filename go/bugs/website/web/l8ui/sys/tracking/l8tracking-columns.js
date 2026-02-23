@@ -16,6 +16,8 @@
             ...col.col('assigneeId', 'Assignee'),
             ...col.col('component', 'Component'),
             ...col.enum('resolution', 'Resolution', null, render.resolution),
+            ...col.enum('triageStatus', 'AI Triage', null, render.triageStatus),
+            ...col.col('aiConfidence', 'AI Conf.'),
             ...col.date('createdDate', 'Created'),
             ...col.date('resolvedDate', 'Resolved')
         ],
@@ -29,6 +31,8 @@
             ...col.col('assigneeId', 'Assignee'),
             ...col.col('component', 'Component'),
             ...col.col('targetVersion', 'Target Version'),
+            ...col.enum('triageStatus', 'AI Triage', null, render.triageStatus),
+            ...col.col('aiConfidence', 'AI Conf.'),
             ...col.date('createdDate', 'Created')
         ],
 
