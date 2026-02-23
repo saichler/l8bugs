@@ -1,0 +1,256 @@
+<!--
+© 2025 Sharon Aicler (saichler@gmail.com)
+
+Layer 8 Ecosystem is licensed under the Apache License, Version 2.0.
+You may obtain a copy of the License at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#ffffff">
+    <title>L8Bugs Mobile</title>
+    <link rel="icon" href="../l8ui/images/logo.gif">
+    <link rel="apple-touch-icon" href="../l8ui/images/logo.gif">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/app-base.css">
+    <link rel="stylesheet" href="css/app-header.css">
+    <link rel="stylesheet" href="css/app-nav.css">
+    <link rel="stylesheet" href="css/app-sidebar.css">
+    <link rel="stylesheet" href="../l8ui/shared/layer8d-toggle-tree.css">
+    <link rel="stylesheet" href="../l8ui/sys/modules/l8sys-modules.css">
+    <link rel="stylesheet" href="../l8ui/m/css/layer8m-popup.css">
+    <link rel="stylesheet" href="../l8ui/m/css/layer8m-confirm.css">
+    <link rel="stylesheet" href="../l8ui/m/css/layer8m-table.css">
+    <link rel="stylesheet" href="../l8ui/m/css/layer8m-edit-table.css">
+    <link rel="stylesheet" href="../l8ui/m/css/layer8m-forms.css">
+    <link rel="stylesheet" href="../l8ui/shared/layer8d-form-fields.css">
+    <link rel="stylesheet" href="../l8ui/m/css/layer8m-datepicker.css">
+    <link rel="stylesheet" href="../l8ui/m/css/layer8m-reference-picker.css">
+    <link rel="stylesheet" href="../l8ui/m/css/layer8m-nav-cards.css">
+    <link rel="stylesheet" href="../l8ui/chart/layer8d-chart.css">
+    <link rel="stylesheet" href="../l8ui/kanban/layer8d-kanban.css">
+    <link rel="stylesheet" href="../l8ui/timeline/layer8d-timeline.css">
+    <link rel="stylesheet" href="../l8ui/calendar/layer8d-calendar.css">
+    <link rel="stylesheet" href="../l8ui/tree_grid/layer8d-tree-grid.css">
+    <link rel="stylesheet" href="../l8ui/gantt/layer8d-gantt.css">
+    <link rel="stylesheet" href="../l8ui/wizard/layer8d-wizard.css">
+    <link rel="stylesheet" href="../l8ui/dashboard/layer8d-widget.css">
+    <link rel="stylesheet" href="../l8ui/shared/layer8-view-switcher.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="mobile-header">
+            <button class="header-menu-btn" id="menu-toggle">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
+            <div class="header-logo">
+                <img src="../l8ui/images/logo.gif" alt="L8Bugs">
+                <span class="header-logo-text">L8Bugs</span>
+            </div>
+            <div class="header-actions">
+                <button class="header-action-btn" id="refresh-btn" title="Refresh">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M23 4v6h-6"></path>
+                        <path d="M1 20v-6h6"></path>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Sidebar -->
+        <aside class="mobile-sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo">
+                    <img src="../l8ui/images/logo.gif" alt="L8Bugs">
+                    <span class="sidebar-logo-text">L8Bugs</span>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="sidebar-section">
+                    <div class="sidebar-section-title">Modules</div>
+                    <a href="#bugs" class="sidebar-item active" data-section="bugs">
+                        <span class="sidebar-item-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M8 2l1.5 1.5"></path>
+                                <path d="M14.5 2L16 3.5"></path>
+                                <path d="M9.5 5.5L8 7"></path>
+                                <path d="M14.5 5.5L16 7"></path>
+                                <circle cx="12" cy="14" r="6"></circle>
+                                <path d="M12 8v2"></path>
+                                <path d="M6 14H4"></path>
+                                <path d="M20 14h-2"></path>
+                            </svg>
+                        </span>
+                        Bug Tracking
+                    </a>
+                    <a href="#system" class="sidebar-item" data-section="system" data-module="system">
+                        <span class="sidebar-item-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            </svg>
+                        </span>
+                        System
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-user">
+                <div class="sidebar-user-info">
+                    <div class="sidebar-avatar" id="user-avatar">U</div>
+                    <div class="sidebar-user-details">
+                        <div class="sidebar-user-name" id="user-name">User</div>
+                        <div class="sidebar-user-role">Administrator</div>
+                    </div>
+                </div>
+                <button class="sidebar-logout-btn" onclick="MobileApp.logout()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div id="content-area">
+                <div class="loading">Loading</div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts - Core -->
+    <script src="../l8ui/m/js/layer8m-config.js"></script>
+    <script src="js/mobile-config-bugs.js"></script>
+    <script src="../l8ui/m/js/layer8m-auth.js"></script>
+    <script src="../l8ui/m/js/layer8m-utils.js"></script>
+    <!-- Shared Desktop Utilities -->
+    <script src="../l8ui/shared/layer8d-config.js"></script>
+    <script src="../l8ui/shared/layer8d-utils.js"></script>
+    <script src="../l8ui/shared/layer8d-renderers.js"></script>
+    <script src="../l8ui/shared/layer8d-reference-registry.js"></script>
+    <!-- Factory Components -->
+    <script src="../l8ui/shared/layer8-enum-factory.js"></script>
+    <script src="../l8ui/shared/layer8-ref-factory.js"></script>
+    <script src="../l8ui/shared/layer8-column-factory.js"></script>
+    <script src="../l8ui/shared/layer8-form-factory.js"></script>
+    <script src="../l8ui/shared/layer8-form-factory-presets.js"></script>
+    <script src="../l8ui/m/js/layer8m-module-registry.js"></script>
+    <script src="../l8ui/m/js/layer8m-popup.js"></script>
+    <script src="../l8ui/m/js/layer8m-confirm.js"></script>
+    <script src="../l8ui/m/js/layer8m-data-source.js"></script>
+    <script src="../l8ui/m/js/layer8m-table.js"></script>
+    <script src="../l8ui/m/js/layer8m-edit-table.js"></script>
+    <script src="../l8ui/m/js/layer8m-view-factory.js"></script>
+    <script src="../l8ui/shared/layer8d-view-factory.js"></script>
+    <script src="../l8ui/shared/layer8d-data-source.js"></script>
+    <script src="../l8ui/shared/layer8-view-switcher.js"></script>
+    <!-- Chart Component -->
+    <script src="../l8ui/chart/layer8d-chart-core.js"></script>
+    <script src="../l8ui/chart/layer8d-chart-bar.js"></script>
+    <script src="../l8ui/chart/layer8d-chart-line.js"></script>
+    <script src="../l8ui/chart/layer8d-chart-pie.js"></script>
+    <script src="../l8ui/m/js/layer8m-chart.js"></script>
+    <!-- Kanban Component -->
+    <script src="../l8ui/kanban/layer8d-kanban-core.js"></script>
+    <script src="../l8ui/kanban/layer8d-kanban-render.js"></script>
+    <script src="../l8ui/kanban/layer8d-kanban-events.js"></script>
+    <script src="../l8ui/m/js/layer8m-kanban.js"></script>
+    <!-- Timeline Component -->
+    <script src="../l8ui/timeline/layer8d-timeline.js"></script>
+    <script src="../l8ui/m/js/layer8m-timeline.js"></script>
+    <!-- Calendar Component -->
+    <script src="../l8ui/calendar/layer8d-calendar-core.js"></script>
+    <script src="../l8ui/calendar/layer8d-calendar-render.js"></script>
+    <script src="../l8ui/calendar/layer8d-calendar-events.js"></script>
+    <script src="../l8ui/m/js/layer8m-calendar.js"></script>
+    <!-- Tree Grid Component -->
+    <script src="../l8ui/tree_grid/layer8d-tree-grid-core.js"></script>
+    <script src="../l8ui/tree_grid/layer8d-tree-grid-render.js"></script>
+    <script src="../l8ui/tree_grid/layer8d-tree-grid-events.js"></script>
+    <script src="../l8ui/m/js/layer8m-tree-grid.js"></script>
+    <!-- Gantt Component -->
+    <script src="../l8ui/gantt/layer8d-gantt-core.js"></script>
+    <script src="../l8ui/gantt/layer8d-gantt-render.js"></script>
+    <script src="../l8ui/gantt/layer8d-gantt-events.js"></script>
+    <script src="../l8ui/m/js/layer8m-gantt.js"></script>
+    <!-- Wizard Component -->
+    <script src="../l8ui/wizard/layer8d-wizard-core.js"></script>
+    <script src="../l8ui/wizard/layer8d-wizard-render.js"></script>
+    <script src="../l8ui/m/js/layer8m-wizard.js"></script>
+    <!-- Dashboard Widget Component -->
+    <script src="../l8ui/dashboard/layer8d-widget.js"></script>
+    <!-- Forms Components -->
+    <script src="../l8ui/m/js/layer8m-forms-fields.js"></script>
+    <script src="../l8ui/m/js/layer8m-forms-fields-reference.js"></script>
+    <script src="../l8ui/m/js/layer8m-forms-fields-ext.js"></script>
+    <script src="../l8ui/m/js/layer8m-forms.js"></script>
+    <script src="../l8ui/m/js/layer8m-forms-inline.js"></script>
+    <script src="../l8ui/m/js/layer8m-datepicker.js"></script>
+    <!-- Generic Reference Registry -->
+    <script src="../l8ui/m/js/layer8m-reference-registry.js"></script>
+    <!-- Bugs Reference Registry -->
+    <script src="js/bugs/layer8m-reference-registry-bugs.js"></script>
+    <script src="../l8ui/m/js/layer8m-reference-picker.js"></script>
+
+    <!-- Scripts - Shared Renderers -->
+    <script src="../l8ui/m/js/layer8m-renderers.js"></script>
+
+    <!-- Scripts - BUGS Enums -->
+    <script src="js/bugs/tracking-enums.js"></script>
+
+    <!-- Scripts - BUGS Columns -->
+    <script src="js/bugs/tracking-columns.js"></script>
+
+    <!-- Scripts - BUGS Forms -->
+    <script src="js/bugs/tracking-forms.js"></script>
+
+    <!-- Scripts - BUGS Registry -->
+    <script src="js/bugs/bugs-index.js"></script>
+
+    <!-- Scripts - SYS Columns & Forms -->
+    <!-- (System section uses inline scripts in system.html) -->
+
+    <!-- Scripts - Shared Toggle Tree + Module Filter -->
+    <script src="../l8ui/shared/layer8d-toggle-tree.js"></script>
+    <script src="../l8ui/shared/layer8d-module-filter.js"></script>
+    <script src="../l8ui/sys/modules/l8sys-dependency-graph.js"></script>
+    <script src="../l8ui/sys/modules/l8sys-modules-map.js"></script>
+    <script src="../l8ui/sys/modules/l8sys-modules.js"></script>
+
+    <!-- Scripts - Navigation Core -->
+    <script src="../l8ui/m/js/layer8m-nav-crud.js"></script>
+    <script src="../l8ui/m/js/layer8m-nav-data.js"></script>
+    <script src="../l8ui/m/js/layer8m-nav.js"></script>
+    <!-- Navigation Config -->
+    <script src="js/layer8m-nav-config-bugs.js"></script>
+    <!-- App Core -->
+    <script src="js/app-core.js"></script>
+</body>
+</html>

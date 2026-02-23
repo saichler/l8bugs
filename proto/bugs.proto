@@ -1,0 +1,338 @@
+// © 2025 Sharon Aicler (saichler@gmail.com)
+//
+// Layer 8 Ecosystem is licensed under the Apache License, Version 2.0.
+// You may obtain a copy of the License at:
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// bugs.proto defines the data model for L8Bugs — an AI-first bug & feature
+// tracking system built on the Layer8 framework.
+
+syntax = "proto3";
+
+package l8bugs;
+
+option go_package = "./types/l8bugs";
+
+import "erp-common.proto";
+import "api.proto";
+
+// ============================================================================
+// Enums
+// ============================================================================
+
+enum Priority {
+    PRIORITY_UNSPECIFIED = 0;
+    PRIORITY_CRITICAL = 1;
+    PRIORITY_HIGH = 2;
+    PRIORITY_MEDIUM = 3;
+    PRIORITY_LOW = 4;
+}
+
+enum Severity {
+    SEVERITY_UNSPECIFIED = 0;
+    SEVERITY_BLOCKER = 1;
+    SEVERITY_MAJOR = 2;
+    SEVERITY_MINOR = 3;
+    SEVERITY_TRIVIAL = 4;
+}
+
+enum BugStatus {
+    BUG_STATUS_UNSPECIFIED = 0;
+    BUG_STATUS_OPEN = 1;
+    BUG_STATUS_TRIAGED = 2;
+    BUG_STATUS_IN_PROGRESS = 3;
+    BUG_STATUS_IN_REVIEW = 4;
+    BUG_STATUS_RESOLVED = 5;
+    BUG_STATUS_CLOSED = 6;
+    BUG_STATUS_REOPENED = 7;
+    BUG_STATUS_WONT_FIX = 8;
+    BUG_STATUS_DUPLICATE = 9;
+    BUG_STATUS_CANNOT_REPRODUCE = 10;
+}
+
+enum FeatureStatus {
+    FEATURE_STATUS_UNSPECIFIED = 0;
+    FEATURE_STATUS_PROPOSED = 1;
+    FEATURE_STATUS_TRIAGED = 2;
+    FEATURE_STATUS_APPROVED = 3;
+    FEATURE_STATUS_IN_PROGRESS = 4;
+    FEATURE_STATUS_IN_REVIEW = 5;
+    FEATURE_STATUS_DONE = 6;
+    FEATURE_STATUS_CLOSED = 7;
+    FEATURE_STATUS_REJECTED = 8;
+    FEATURE_STATUS_DEFERRED = 9;
+}
+
+enum Resolution {
+    RESOLUTION_UNSPECIFIED = 0;
+    RESOLUTION_FIXED = 1;
+    RESOLUTION_WONT_FIX = 2;
+    RESOLUTION_DUPLICATE = 3;
+    RESOLUTION_CANNOT_REPRODUCE = 4;
+    RESOLUTION_BY_DESIGN = 5;
+    RESOLUTION_OBSOLETE = 6;
+}
+
+enum AssigneeType {
+    ASSIGNEE_TYPE_UNSPECIFIED = 0;
+    ASSIGNEE_TYPE_HUMAN = 1;
+    ASSIGNEE_TYPE_AI_AGENT = 2;
+}
+
+enum AuthorType {
+    AUTHOR_TYPE_UNSPECIFIED = 0;
+    AUTHOR_TYPE_HUMAN = 1;
+    AUTHOR_TYPE_AI_AGENT = 2;
+    AUTHOR_TYPE_SYSTEM = 3;
+}
+
+enum ProjectStatus {
+    PROJECT_STATUS_UNSPECIFIED = 0;
+    PROJECT_STATUS_ACTIVE = 1;
+    PROJECT_STATUS_ARCHIVED = 2;
+}
+
+enum ProjectVisibility {
+    PROJECT_VISIBILITY_UNSPECIFIED = 0;
+    PROJECT_VISIBILITY_PUBLIC = 1;
+    PROJECT_VISIBILITY_PRIVATE = 2;
+    PROJECT_VISIBILITY_INTERNAL = 3;
+}
+
+enum SprintStatus {
+    SPRINT_STATUS_UNSPECIFIED = 0;
+    SPRINT_STATUS_PLANNING = 1;
+    SPRINT_STATUS_ACTIVE = 2;
+    SPRINT_STATUS_COMPLETED = 3;
+}
+
+enum MilestoneStatus {
+    MILESTONE_STATUS_UNSPECIFIED = 0;
+    MILESTONE_STATUS_OPEN = 1;
+    MILESTONE_STATUS_CLOSED = 2;
+}
+
+// ============================================================================
+// Embedded Child Messages (no List types, no services)
+// ============================================================================
+
+message Comment {
+    string comment_id = 1;
+    string author_id = 2;
+    AuthorType author_type = 3;
+    string body = 4;
+    bool is_internal = 5;
+    repeated Attachment attachments = 6;
+    int64 created_date = 7;
+    int64 edited_date = 8;
+}
+
+message Attachment {
+    string attachment_id = 1;
+    string filename = 2;
+    string content_type = 3;
+    int64 size = 4;
+    string url = 5;
+    string thumbnail_url = 6;
+    string uploaded_by = 7;
+    int64 uploaded_date = 8;
+}
+
+message ActivityEntry {
+    string entry_id = 1;
+    string actor_id = 2;
+    AuthorType actor_type = 3;
+    string action = 4;
+    string field_name = 5;
+    string old_value = 6;
+    string new_value = 7;
+    int64 timestamp = 8;
+}
+
+message Watcher {
+    string user_id = 1;
+    int64 added_date = 2;
+}
+
+message Vote {
+    string user_id = 1;
+    int64 vote_date = 2;
+}
+
+message Label {
+    string label_id = 1;
+    string name = 2;
+    string color = 3;
+    string description = 4;
+}
+
+message Component {
+    string component_id = 1;
+    string name = 2;
+    string description = 3;
+    string lead_id = 4;
+    string default_assignee_id = 5;
+}
+
+message Milestone {
+    string milestone_id = 1;
+    string name = 2;
+    string description = 3;
+    MilestoneStatus status = 4;
+    int64 due_date = 5;
+    int32 completion_percentage = 6;
+}
+
+// ============================================================================
+// Prime Object: Project
+// ============================================================================
+
+message BugsProject {
+    string project_id = 1;
+    string name = 2;
+    string key = 3;
+    string description = 4;
+    string owner_id = 5;
+    ProjectStatus status = 6;
+    string default_assignee_id = 7;
+    ProjectVisibility visibility = 8;
+    int64 created_date = 9;
+    repeated Label labels = 20;
+    repeated Component components = 21;
+    repeated Milestone milestones = 22;
+    erp.AuditInfo audit_info = 30;
+}
+
+message BugsProjectList {
+    repeated BugsProject list = 1;
+    l8api.L8MetaData metadata = 2;
+}
+
+// ============================================================================
+// Prime Object: Bug
+// ============================================================================
+
+message Bug {
+    string bug_id = 1;
+    string project_id = 2;
+    string bug_number = 3;
+    string title = 4;
+    string description = 5;
+    string steps_to_reproduce = 6;
+    string expected_behavior = 7;
+    string actual_behavior = 8;
+    BugStatus status = 9;
+    Priority priority = 10;
+    Severity severity = 11;
+    string reporter_id = 12;
+    string assignee_id = 13;
+    AssigneeType assignee_type = 14;
+    repeated string labels = 15;
+    string component = 16;
+    string environment = 17;
+    string stack_trace = 18;
+    string affected_version = 19;
+    string fix_version = 20;
+    int64 due_date = 21;
+    int32 estimated_effort = 22;
+    int32 ai_confidence = 23;
+    Priority ai_suggested_priority = 24;
+    string ai_suggested_component = 25;
+    string ai_root_cause = 26;
+    Resolution resolution = 27;
+    int64 resolved_date = 28;
+    string linked_pr_url = 29;
+    string linked_branch = 30;
+    string duplicate_of_id = 31;
+    string parent_bug_id = 32;
+    int32 vote_count = 33;
+    int32 watcher_count = 34;
+    int64 created_date = 35;
+    repeated Comment comments = 40;
+    repeated Attachment attachments = 41;
+    repeated ActivityEntry activity = 42;
+    repeated Watcher watchers = 43;
+    repeated Vote votes = 44;
+    repeated string related_bug_ids = 45;
+    erp.AuditInfo audit_info = 50;
+}
+
+message BugList {
+    repeated Bug list = 1;
+    l8api.L8MetaData metadata = 2;
+}
+
+// ============================================================================
+// Prime Object: Feature
+// ============================================================================
+
+message Feature {
+    string feature_id = 1;
+    string project_id = 2;
+    string feature_number = 3;
+    string title = 4;
+    string description = 5;
+    string user_story = 6;
+    string acceptance_criteria = 7;
+    FeatureStatus status = 8;
+    Priority priority = 9;
+    string reporter_id = 10;
+    string assignee_id = 11;
+    AssigneeType assignee_type = 12;
+    repeated string labels = 13;
+    string component = 14;
+    string target_version = 15;
+    int64 due_date = 16;
+    int32 estimated_effort = 17;
+    int32 ai_confidence = 18;
+    Priority ai_suggested_priority = 19;
+    string ai_breakdown = 20;
+    string linked_pr_url = 21;
+    string linked_branch = 22;
+    string parent_feature_id = 23;
+    int32 vote_count = 24;
+    int32 watcher_count = 25;
+    int64 created_date = 26;
+    repeated Comment comments = 40;
+    repeated Attachment attachments = 41;
+    repeated ActivityEntry activity = 42;
+    repeated Watcher watchers = 43;
+    repeated Vote votes = 44;
+    repeated string related_feature_ids = 45;
+    repeated string related_bug_ids = 46;
+    erp.AuditInfo audit_info = 50;
+}
+
+message FeatureList {
+    repeated Feature list = 1;
+    l8api.L8MetaData metadata = 2;
+}
+
+// ============================================================================
+// Prime Object: Sprint (message defined now, service deferred to Phase 2)
+// ============================================================================
+
+message BugsSprint {
+    string sprint_id = 1;
+    string project_id = 2;
+    string name = 3;
+    string goal = 4;
+    SprintStatus status = 5;
+    int64 start_date = 6;
+    int64 end_date = 7;
+    int32 capacity = 8;
+    int32 completed_points = 9;
+    erp.AuditInfo audit_info = 30;
+}
+
+message BugsSprintList {
+    repeated BugsSprint list = 1;
+    l8api.L8MetaData metadata = 2;
+}

@@ -1,0 +1,193 @@
+/*
+© 2025 Sharon Aicler (saichler@gmail.com)
+
+Layer 8 Ecosystem is licensed under the Apache License, Version 2.0.
+You may obtain a copy of the License at:
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+/**
+ * Mobile Bugs Tracking Module - Form Definitions
+ * Desktop Equivalent: bugs/tracking/tracking-forms.js
+ */
+(function() {
+    'use strict';
+    window.MobileBugsTracking = window.MobileBugsTracking || {};
+
+    const f = window.Layer8FormFactory;
+    const enums = MobileBugsTracking.enums;
+
+    MobileBugsTracking.forms = {
+        Bug: f.form('Bug', [
+            f.section('Bug Details', [
+                ...f.text('bugNumber', 'Bug #'),
+                ...f.text('title', 'Title', true),
+                ...f.reference('projectId', 'Project', 'BugsProject', true),
+                ...f.select('status', 'Status', enums.BUG_STATUS),
+                ...f.select('priority', 'Priority', enums.PRIORITY),
+                ...f.select('severity', 'Severity', enums.SEVERITY)
+            ]),
+            f.section('Description', [
+                ...f.textarea('description', 'Description'),
+                ...f.textarea('stepsToReproduce', 'Steps to Reproduce'),
+                ...f.textarea('expectedBehavior', 'Expected Behavior'),
+                ...f.textarea('actualBehavior', 'Actual Behavior')
+            ]),
+            f.section('Assignment', [
+                ...f.text('assigneeId', 'Assignee'),
+                ...f.select('assigneeType', 'Assignee Type', enums.ASSIGNEE_TYPE),
+                ...f.text('reporterId', 'Reporter'),
+                ...f.text('component', 'Component'),
+                ...f.text('labels', 'Labels')
+            ]),
+            f.section('Technical', [
+                ...f.text('environment', 'Environment'),
+                ...f.textarea('stackTrace', 'Stack Trace'),
+                ...f.text('affectedVersion', 'Affected Version'),
+                ...f.text('fixVersion', 'Fix Version')
+            ]),
+            f.section('AI Analysis', [
+                ...f.number('aiConfidence', 'AI Confidence'),
+                ...f.select('aiSuggestedPriority', 'AI Suggested Priority', enums.PRIORITY),
+                ...f.text('aiSuggestedComponent', 'AI Suggested Component'),
+                ...f.textarea('aiRootCause', 'AI Root Cause')
+            ]),
+            f.section('Resolution', [
+                ...f.select('resolution', 'Resolution', enums.RESOLUTION),
+                ...f.date('resolvedDate', 'Resolved Date'),
+                ...f.text('linkedPrUrl', 'Linked PR URL'),
+                ...f.text('linkedBranch', 'Linked Branch'),
+                ...f.reference('duplicateOfId', 'Duplicate Of', 'Bug'),
+                ...f.reference('parentBugId', 'Parent Bug', 'Bug')
+            ]),
+            f.section('Tracking', [
+                ...f.date('dueDate', 'Due Date'),
+                ...f.number('estimatedEffort', 'Estimated Effort'),
+                ...f.number('voteCount', 'Votes'),
+                ...f.number('watcherCount', 'Watchers')
+            ]),
+            f.section('Comments', [
+                ...f.inlineTable('comments', 'Comments', [
+                    { key: 'commentId', label: 'ID', hidden: true },
+                    { key: 'authorId', label: 'Author', type: 'text' },
+                    { key: 'authorType', label: 'Type', type: 'select', options: enums.AUTHOR_TYPE },
+                    { key: 'body', label: 'Comment', type: 'textarea' },
+                    { key: 'isInternal', label: 'Internal', type: 'checkbox' },
+                    { key: 'createdDate', label: 'Created', type: 'date' }
+                ])
+            ]),
+            f.section('Attachments', [
+                ...f.inlineTable('attachments', 'Attachments', [
+                    { key: 'attachmentId', label: 'ID', hidden: true },
+                    { key: 'filename', label: 'Filename', type: 'text' },
+                    { key: 'contentType', label: 'Type', type: 'text' },
+                    { key: 'size', label: 'Size', type: 'number' },
+                    { key: 'url', label: 'URL', type: 'text' }
+                ])
+            ])
+        ]),
+
+        Feature: f.form('Feature', [
+            f.section('Feature Details', [
+                ...f.text('featureNumber', 'Feature #'),
+                ...f.text('title', 'Title', true),
+                ...f.reference('projectId', 'Project', 'BugsProject', true),
+                ...f.select('status', 'Status', enums.FEATURE_STATUS),
+                ...f.select('priority', 'Priority', enums.PRIORITY)
+            ]),
+            f.section('Description', [
+                ...f.textarea('description', 'Description'),
+                ...f.textarea('userStory', 'User Story'),
+                ...f.textarea('acceptanceCriteria', 'Acceptance Criteria')
+            ]),
+            f.section('Assignment', [
+                ...f.text('assigneeId', 'Assignee'),
+                ...f.select('assigneeType', 'Assignee Type', enums.ASSIGNEE_TYPE),
+                ...f.text('reporterId', 'Reporter'),
+                ...f.text('component', 'Component'),
+                ...f.text('labels', 'Labels')
+            ]),
+            f.section('Planning', [
+                ...f.text('targetVersion', 'Target Version'),
+                ...f.date('dueDate', 'Due Date'),
+                ...f.number('estimatedEffort', 'Estimated Effort'),
+                ...f.number('voteCount', 'Votes'),
+                ...f.number('watcherCount', 'Watchers')
+            ]),
+            f.section('AI Analysis', [
+                ...f.number('aiConfidence', 'AI Confidence'),
+                ...f.select('aiSuggestedPriority', 'AI Suggested Priority', enums.PRIORITY),
+                ...f.textarea('aiBreakdown', 'AI Breakdown')
+            ]),
+            f.section('Links', [
+                ...f.text('linkedPrUrl', 'Linked PR URL'),
+                ...f.text('linkedBranch', 'Linked Branch'),
+                ...f.reference('parentFeatureId', 'Parent Feature', 'Feature')
+            ]),
+            f.section('Comments', [
+                ...f.inlineTable('comments', 'Comments', [
+                    { key: 'commentId', label: 'ID', hidden: true },
+                    { key: 'authorId', label: 'Author', type: 'text' },
+                    { key: 'authorType', label: 'Type', type: 'select', options: enums.AUTHOR_TYPE },
+                    { key: 'body', label: 'Comment', type: 'textarea' },
+                    { key: 'isInternal', label: 'Internal', type: 'checkbox' },
+                    { key: 'createdDate', label: 'Created', type: 'date' }
+                ])
+            ]),
+            f.section('Attachments', [
+                ...f.inlineTable('attachments', 'Attachments', [
+                    { key: 'attachmentId', label: 'ID', hidden: true },
+                    { key: 'filename', label: 'Filename', type: 'text' },
+                    { key: 'contentType', label: 'Type', type: 'text' },
+                    { key: 'size', label: 'Size', type: 'number' },
+                    { key: 'url', label: 'URL', type: 'text' }
+                ])
+            ])
+        ]),
+
+        BugsProject: f.form('Project', [
+            f.section('Project Details', [
+                ...f.text('name', 'Name', true),
+                ...f.text('key', 'Key', true),
+                ...f.textarea('description', 'Description'),
+                ...f.text('ownerId', 'Owner'),
+                ...f.select('status', 'Status', enums.PROJECT_STATUS),
+                ...f.select('visibility', 'Visibility', enums.PROJECT_VISIBILITY),
+                ...f.text('defaultAssigneeId', 'Default Assignee')
+            ]),
+            f.section('Labels', [
+                ...f.inlineTable('labels', 'Labels', [
+                    { key: 'labelId', label: 'ID', hidden: true },
+                    { key: 'name', label: 'Name', type: 'text', required: true },
+                    { key: 'color', label: 'Color', type: 'text' },
+                    { key: 'description', label: 'Description', type: 'text' }
+                ])
+            ]),
+            f.section('Components', [
+                ...f.inlineTable('components', 'Components', [
+                    { key: 'componentId', label: 'ID', hidden: true },
+                    { key: 'name', label: 'Name', type: 'text', required: true },
+                    { key: 'description', label: 'Description', type: 'text' },
+                    { key: 'leadId', label: 'Lead', type: 'text' },
+                    { key: 'defaultAssigneeId', label: 'Default Assignee', type: 'text' }
+                ])
+            ]),
+            f.section('Milestones', [
+                ...f.inlineTable('milestones', 'Milestones', [
+                    { key: 'milestoneId', label: 'ID', hidden: true },
+                    { key: 'name', label: 'Name', type: 'text', required: true },
+                    { key: 'description', label: 'Description', type: 'text' },
+                    { key: 'status', label: 'Status', type: 'select', options: enums.MILESTONE_STATUS },
+                    { key: 'dueDate', label: 'Due Date', type: 'date' },
+                    { key: 'completionPercentage', label: 'Completion %', type: 'number' }
+                ])
+            ])
+        ])
+    };
+})();

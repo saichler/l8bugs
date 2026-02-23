@@ -1,0 +1,17 @@
+{
+    "login": {
+        "appTitle": "L8Bugs by Layer 8",
+        "appDescription": "AI-First Bug & Feature Tracking",
+        "authEndpoint": "/auth",
+        "redirectUrl": "/app.html",
+        "showRememberMe": true,
+        "showRegister": true,
+        "sessionTimeout": 30,
+        "tfaEnabled": true
+    },
+    "app": {
+        "dateFormat": "mm/dd/yyyy",
+        "apiPrefix": "/bugs",
+        "healthPath": "/0/Health"
+    }
+}
