@@ -90,6 +90,13 @@
         ['Closed', 'closed', 'layer8d-status-inactive']
     ]);
 
+    const SPRINT_STATUS = factory.create([
+        ['Unspecified', null, ''],
+        ['Planning', 'planning', 'layer8d-status-pending'],
+        ['Active', 'active', 'layer8d-status-active'],
+        ['Completed', 'completed', 'layer8d-status-inactive']
+    ]);
+
     L8Tracking.enums = {
         BUG_STATUS: BUG_STATUS.enum,
         BUG_STATUS_CLASSES: BUG_STATUS.classes,
@@ -107,7 +114,9 @@
         PROJECT_STATUS_CLASSES: PROJECT_STATUS.classes,
         PROJECT_VISIBILITY: PROJECT_VISIBILITY.enum,
         MILESTONE_STATUS: MILESTONE_STATUS.enum,
-        MILESTONE_STATUS_CLASSES: MILESTONE_STATUS.classes
+        MILESTONE_STATUS_CLASSES: MILESTONE_STATUS.classes,
+        SPRINT_STATUS: SPRINT_STATUS.enum,
+        SPRINT_STATUS_CLASSES: SPRINT_STATUS.classes
     };
 
     L8Tracking.render = {
@@ -120,6 +129,7 @@
         projectStatus: createStatusRenderer(PROJECT_STATUS.enum, PROJECT_STATUS.classes),
         projectVisibility: renderEnum(PROJECT_VISIBILITY.enum),
         milestoneStatus: createStatusRenderer(MILESTONE_STATUS.enum, MILESTONE_STATUS.classes),
+        sprintStatus: createStatusRenderer(SPRINT_STATUS.enum, SPRINT_STATUS.classes),
         date: renderDate
     };
 })();

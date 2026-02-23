@@ -981,12 +981,13 @@ Layer8DReferenceRegistry.register({
    - `m/app.html` — single "System" sidebar section, tracking scripts
    - `m/js/app-core.js` — defaults to system section
 
-### Phase 2: Workflow & Core Features
-- Implement Sprint Go service (with desktop + mobile config files). Label, Component, and Milestone are already available as embedded children of Project from Phase 1 — displayed via `f.inlineTable()` in the Project form.
-- Status workflow transition rules in ServiceCallback validation
-- Sprint management (assign issues to sprints, burndown tracking)
-- Board (Kanban) view via `supportedViews: ['table', 'kanban']` config
-- Activity logging (embedded ActivityEntry in Bug/Feature)
+### Phase 2: Workflow & Core Features ✓
+- ✓ Sprint Go service implemented (`go/bugs/sprints/SprintService.go`, `SprintServiceCallback.go`)
+- ✓ Status workflow transition rules added to Bug, Feature, and Sprint ServiceCallbacks
+- ✓ Kanban board viewConfig added to Bug and Feature services (laneField, lanes, cardTitle, cardSubtitle, cardFields)
+- ✓ Activity Log inline table added to Bug and Feature forms (desktop + mobile)
+- ✓ Sprint service registered in type system, activated in service bootstrap
+- ✓ Desktop + mobile UI complete: config, HTML, enums, columns, forms, reference registry
 
 ### Phase 3: AI Triage
 - AI classification (bug vs. feature, priority, severity, component)

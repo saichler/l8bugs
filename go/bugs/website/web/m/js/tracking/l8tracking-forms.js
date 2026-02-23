@@ -90,6 +90,18 @@ limitations under the License.
                     { key: 'size', label: 'Size', type: 'number' },
                     { key: 'url', label: 'URL', type: 'text' }
                 ])
+            ]),
+            f.section('Activity Log', [
+                ...f.inlineTable('activity', 'Activity', [
+                    { key: 'entryId', label: 'ID', hidden: true },
+                    { key: 'actorId', label: 'Actor', type: 'text' },
+                    { key: 'actorType', label: 'Type', type: 'select', options: enums.AUTHOR_TYPE },
+                    { key: 'action', label: 'Action', type: 'text' },
+                    { key: 'fieldName', label: 'Field', type: 'text' },
+                    { key: 'oldValue', label: 'Old Value', type: 'text' },
+                    { key: 'newValue', label: 'New Value', type: 'text' },
+                    { key: 'timestamp', label: 'When', type: 'date' }
+                ])
             ])
         ]),
 
@@ -148,6 +160,18 @@ limitations under the License.
                     { key: 'size', label: 'Size', type: 'number' },
                     { key: 'url', label: 'URL', type: 'text' }
                 ])
+            ]),
+            f.section('Activity Log', [
+                ...f.inlineTable('activity', 'Activity', [
+                    { key: 'entryId', label: 'ID', hidden: true },
+                    { key: 'actorId', label: 'Actor', type: 'text' },
+                    { key: 'actorType', label: 'Type', type: 'select', options: enums.AUTHOR_TYPE },
+                    { key: 'action', label: 'Action', type: 'text' },
+                    { key: 'fieldName', label: 'Field', type: 'text' },
+                    { key: 'oldValue', label: 'Old Value', type: 'text' },
+                    { key: 'newValue', label: 'New Value', type: 'text' },
+                    { key: 'timestamp', label: 'When', type: 'date' }
+                ])
             ])
         ]),
 
@@ -197,6 +221,21 @@ limitations under the License.
                     { key: 'dueDate', label: 'Due Date', type: 'date' },
                     { key: 'completionPercentage', label: 'Completion %', type: 'number' }
                 ])
+            ])
+        ]),
+
+        BugsSprint: f.form('Sprint', [
+            f.section('Sprint Details', [
+                ...f.text('name', 'Name', true),
+                ...f.reference('projectId', 'Project', 'BugsProject', true),
+                ...f.select('status', 'Status', enums.SPRINT_STATUS),
+                ...f.textarea('goal', 'Goal')
+            ]),
+            f.section('Schedule', [
+                ...f.date('startDate', 'Start Date'),
+                ...f.date('endDate', 'End Date'),
+                ...f.number('capacity', 'Capacity (Story Points)'),
+                ...f.number('completedPoints', 'Completed Points')
             ])
         ])
     };

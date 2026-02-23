@@ -67,6 +67,18 @@ limitations under the License.
             ...col.enum('assigneeType', 'Type', null, render.assigneeType),
             ...col.col('projectId', 'Project'),
             ...col.col('active', 'Active')
+        ],
+
+        BugsSprint: [
+            ...col.id('sprintId'),
+            ...col.col('name', 'Name'),
+            ...col.col('projectId', 'Project'),
+            ...col.enum('status', 'Status', enums.SPRINT_STATUS_VALUES, render.sprintStatus),
+            ...col.col('goal', 'Goal'),
+            ...col.date('startDate', 'Start Date'),
+            ...col.date('endDate', 'End Date'),
+            ...col.col('capacity', 'Capacity'),
+            ...col.col('completedPoints', 'Completed')
         ]
     };
 
@@ -74,6 +86,7 @@ limitations under the License.
         Bug: 'bugId',
         Feature: 'featureId',
         BugsProject: 'projectId',
-        BugsAssignee: 'assigneeId'
+        BugsAssignee: 'assigneeId',
+        BugsSprint: 'sprintId'
     };
 })();

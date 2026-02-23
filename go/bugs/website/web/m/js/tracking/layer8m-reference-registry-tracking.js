@@ -22,7 +22,8 @@ window.Layer8MReferenceRegistryTracking = {
     ...refTrackingM.simple('BugsProject', 'projectId', 'name', 'Project'),
     ...refTrackingM.simple('BugsAssignee', 'assigneeId', 'name', 'Assignee'),
     ...refTrackingM.simple('Bug', 'bugId', 'title', 'Bug'),
-    ...refTrackingM.simple('Feature', 'featureId', 'title', 'Feature')
+    ...refTrackingM.simple('Feature', 'featureId', 'title', 'Feature'),
+    ...refTrackingM.simple('BugsSprint', 'sprintId', 'name', 'Sprint')
 };
 
 // Register with the central registry

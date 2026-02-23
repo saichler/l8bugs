@@ -31,4 +31,5 @@ func registerBugsTypes(resources ifs.IResources) {
 	common.RegisterType[l8bugs.BugsAssignee, l8bugs.BugsAssigneeList](resources, "AssigneeId")
 	common.RegisterType[l8bugs.Bug, l8bugs.BugList](resources, "BugId")
 	common.RegisterType[l8bugs.Feature, l8bugs.FeatureList](resources, "FeatureId")
+	common.RegisterType[l8bugs.BugsSprint, l8bugs.BugsSprintList](resources, "SprintId")
 }

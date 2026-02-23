@@ -33,6 +33,7 @@ limitations under the License.
             <button class="section-tab" data-service="features">Features</button>
             <button class="section-tab" data-service="projects">Projects</button>
             <button class="section-tab" data-service="assignees">Assignees</button>
+            <button class="section-tab" data-service="sprints">Sprints</button>
         </div>
         <div id="system-tracking-table"></div>
     </div>
@@ -141,6 +142,15 @@ var TRACKING_SERVICES = {
         idField: 'assigneeId',
         columns: (window.MobileL8Tracking && MobileL8Tracking.columns) ? MobileL8Tracking.columns.BugsAssignee : [
             { key: 'assigneeId', label: 'Assignee ID', primary: true, filterKey: 'assigneeId' },
+            { key: 'name', label: 'Name', secondary: true, filterKey: 'name' }
+        ]
+    },
+    sprints: {
+        endpoint: Layer8MConfig.resolveEndpoint('/20/Sprint'),
+        modelName: 'BugsSprint',
+        idField: 'sprintId',
+        columns: (window.MobileL8Tracking && MobileL8Tracking.columns) ? MobileL8Tracking.columns.BugsSprint : [
+            { key: 'sprintId', label: 'Sprint ID', primary: true, filterKey: 'sprintId' },
             { key: 'name', label: 'Name', secondary: true, filterKey: 'name' }
         ]
     }

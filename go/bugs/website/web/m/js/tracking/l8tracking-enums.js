@@ -109,6 +109,13 @@ limitations under the License.
         ['Closed', 'closed', 'status-inactive']
     ]);
 
+    const SPRINT_STATUS = factory.create([
+        ['Unspecified', null, ''],
+        ['Planning', 'planning', 'status-pending'],
+        ['Active', 'active', 'status-active'],
+        ['Completed', 'completed', 'status-inactive']
+    ]);
+
     MobileL8Tracking.enums = {
         BUG_STATUS: BUG_STATUS.enum,
         BUG_STATUS_VALUES: BUG_STATUS.values,
@@ -133,7 +140,10 @@ limitations under the License.
         PROJECT_VISIBILITY: PROJECT_VISIBILITY.enum,
         MILESTONE_STATUS: MILESTONE_STATUS.enum,
         MILESTONE_STATUS_VALUES: MILESTONE_STATUS.values,
-        MILESTONE_STATUS_CLASSES: MILESTONE_STATUS.classes
+        MILESTONE_STATUS_CLASSES: MILESTONE_STATUS.classes,
+        SPRINT_STATUS: SPRINT_STATUS.enum,
+        SPRINT_STATUS_VALUES: SPRINT_STATUS.values,
+        SPRINT_STATUS_CLASSES: SPRINT_STATUS.classes
     };
 
     MobileL8Tracking.render = {
@@ -146,6 +156,7 @@ limitations under the License.
         projectStatus: createStatusRenderer(PROJECT_STATUS.enum, PROJECT_STATUS.classes),
         projectVisibility: renderEnum(PROJECT_VISIBILITY.enum),
         milestoneStatus: createStatusRenderer(MILESTONE_STATUS.enum, MILESTONE_STATUS.classes),
+        sprintStatus: createStatusRenderer(SPRINT_STATUS.enum, SPRINT_STATUS.classes),
         date: renderDate
     };
 })();
