@@ -1,0 +1,114 @@
+package tests
+
+import (
+	"crypto/tls"
+	"fmt"
+	"github.com/saichler/l8bugs/go/bugs/common"
+	"github.com/saichler/l8bugs/go/bugs/services"
+	"github.com/saichler/l8bugs/go/tests/mocks"
+	"github.com/saichler/l8types/go/ifs"
+	"net/http"
+	"testing"
+	"time"
+)
+
+func TestMain(m *testing.M) {
+	setup()
+	m.Run()
+	tear()
+}
+
+func dropAllTables(t *testing.T, vnic ifs.IVNic) {
+	creds := common.DB_CREDS
+	dbname := common.DB_NAME
+	_, user, pass, _, err := vnic.Resources().Security().Credential(creds, dbname, vnic.Resources())
+	if err != nil {
+		t.Fatalf("Failed to get credentials: %v", err)
+	}
+	db := common.OpenDBConection(dbname, user, pass)
+	rows, err := db.Query("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")
+	if err != nil {
+		t.Fatalf("Failed to query tables: %v", err)
+	}
+	defer rows.Close()
+
+	var tables []string
+	for rows.Next() {
+		var name string
+		if err := rows.Scan(&name); err != nil {
+			t.Fatalf("Failed to scan table name: %v", err)
+		}
+		tables = append(tables, name)
+	}
+
+	for _, table := range tables {
+		_, err := db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS \"%s\" CASCADE", table))
+		if err != nil {
+			t.Fatalf("Failed to drop table %s: %v", table, err)
+		}
+	}
+	fmt.Printf("Dropped %d tables\n", len(tables))
+}
+
+func TestAllServices(t *testing.T) {
+	erpServicesVnic := topo.VnicByVnetNum(1, 1)
+	webServiceVnic := topo.VnicByVnetNum(3, 3)
+	log := webServiceVnic.Resources().Logger()
+
+	// 0. Drop all existing tables for a clean slate
+	dropAllTables(t, erpServicesVnic)
+
+	// 1. Activate all L8Bugs services on the services vNic
+	services.ActivateBugsServices(common.DB_CREDS, common.DB_NAME, erpServicesVnic)
+
+	// 2. Start web server on the web service vNic (non-blocking)
+	port := 9443
+	startWebServer(port, webServiceVnic)
+	time.Sleep(10 * time.Second)
+
+	// 3. Create mock client pointing to web server
+	httpClient := &http.Client{
+		Timeout: 30 * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+	client := mocks.NewBugsClient(fmt.Sprintf("https://localhost:%d", port), httpClient)
+	err := client.Authenticate("operator", "operator")
+	if err != nil {
+		log.Fail(t, "Authentication failed: ", err.Error())
+		return
+	}
+
+	// 4. Run all mock data phases
+	testStore = &mocks.MockDataStore{}
+	mocks.RunAllPhases(client, testStore)
+
+	// 5. Verify key entity counts
+	if len(testStore.ProjectIDs) == 0 {
+		log.Fail(t, "No projects generated")
+	}
+	if len(testStore.BugIDs) == 0 {
+		log.Fail(t, "No bugs generated")
+	}
+	if len(testStore.FeatureIDs) == 0 {
+		log.Fail(t, "No features generated")
+	}
+
+	mocks.PrintSummary(testStore)
+
+	// 6. Test service handlers (all 6 services)
+	testServiceHandlers(t, erpServicesVnic)
+
+	// 7. Test service getters (all 6 services)
+	testServiceGetters(t, erpServicesVnic)
+
+	// 8. Test CRUD lifecycle
+	testCRUD(t, client)
+
+	// 9. Test validation
+	testValidation(t, client)
+
+	// 10. Test business logic (status transitions, date validation)
+	testBusinessLogic(t, client)
+}
