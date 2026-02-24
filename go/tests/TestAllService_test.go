@@ -114,4 +114,7 @@ func TestAllServices(t *testing.T) {
 
 	// 11. Test webhook integration
 	testWebhook(t, client)
+
+	// 12. Test MCP server tools
+	testMCP(t, erpServicesVnic)
 }

@@ -69,7 +69,9 @@ func GetEntity[T any](serviceName string, serviceArea byte, filter *T, vnic ifs.
 			return nil, resp.Error()
 		}
 		if resp.Element() != nil {
-			return resp.Element().(*T), nil
+			if typed, ok := resp.Element().(*T); ok {
+				return typed, nil
+			}
 		}
 		return nil, nil
 	}
@@ -78,7 +80,9 @@ func GetEntity[T any](serviceName string, serviceArea byte, filter *T, vnic ifs.
 		return nil, resp.Error()
 	}
 	if resp.Element() != nil {
-		return resp.Element().(*T), nil
+		if typed, ok := resp.Element().(*T); ok {
+			return typed, nil
+		}
 	}
 	return nil, nil
 }
@@ -133,7 +137,9 @@ func PostEntity[T any](serviceName string, serviceArea byte, entity *T, vnic ifs
 			return nil, resp.Error()
 		}
 		if resp.Element() != nil {
-			return resp.Element().(*T), nil
+			if typed, ok := resp.Element().(*T); ok {
+				return typed, nil
+			}
 		}
 		return entity, nil
 	}
@@ -142,7 +148,9 @@ func PostEntity[T any](serviceName string, serviceArea byte, entity *T, vnic ifs
 		return nil, resp.Error()
 	}
 	if resp.Element() != nil {
-		return resp.Element().(*T), nil
+		if typed, ok := resp.Element().(*T); ok {
+			return typed, nil
+		}
 	}
 	return entity, nil
 }

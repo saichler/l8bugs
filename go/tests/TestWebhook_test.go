@@ -43,6 +43,9 @@ func testWebhook(t *testing.T, client *mocks.BugsClient) {
 	testWebhookNonMergedPRIgnored(t, client, projectId)
 	testWebhookPushNoMatchingRef(t, client)
 	testWebhookPushNoRefInMessage(t, client, projectId)
+
+	// GitLab webhook tests
+	testGitLabWebhook(t, client)
 }
 
 // testWebhookMethodNotAllowed verifies GET requests are rejected with 405.

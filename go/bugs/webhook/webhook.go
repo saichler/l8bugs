@@ -11,6 +11,7 @@ import (
 	"github.com/saichler/l8web/go/web/server"
 	"github.com/saichler/l8web/go/web/webhook"
 	"github.com/saichler/l8web/go/web/webhook/github"
+	"github.com/saichler/l8web/go/web/webhook/gitlab"
 )
 
 const (
@@ -20,36 +21,42 @@ const (
 	serviceArea    = byte(20)
 )
 
-// Register registers the GitHub webhook handler on the REST server.
+// Register registers the GitHub and GitLab webhook handlers on the REST server.
 func Register(svr *server.RestServer, vnic ifs.IVNic) {
 	h := &webhookHandler{vnic: vnic}
-	provider := &github.Provider{}
-	handler := webhook.NewHandler(provider, h.handleEvent, h.secretFunc)
-	svr.RegisterHandler("webhook/github", handler)
+
+	// GitHub webhook
+	ghProvider := &github.Provider{}
+	ghHandler := webhook.NewHandler(ghProvider, h.handleGitHubEvent, h.secretFuncGitHub)
+	svr.RegisterHandler("webhook/github", ghHandler)
 	fmt.Println("[webhook] GitHub webhook registered")
+
+	// GitLab webhook
+	glProvider := &gitlab.Provider{}
+	glHandler := webhook.NewHandler(glProvider, h.handleGitLabEvent, h.secretFuncGitLab)
+	svr.RegisterHandler("webhook/gitlab", glHandler)
+	fmt.Println("[webhook] GitLab webhook registered")
 }
 
 type webhookHandler struct {
 	vnic ifs.IVNic
 }
 
-// handleEvent dispatches a webhook event to the appropriate handler.
-// Returns an HTTP status code.
-func (h *webhookHandler) handleEvent(eventType string, payload []byte) int {
+// --- GitHub handlers ---
+
+func (h *webhookHandler) handleGitHubEvent(eventType string, payload []byte) int {
 	switch eventType {
 	case "pull_request":
-		h.handlePR(payload)
+		h.handleGitHubPR(payload)
 	case "push":
-		h.handlePush(payload)
+		h.handleGitHubPush(payload)
 	default:
-		fmt.Printf("[webhook] ignoring event: %s\n", eventType)
+		fmt.Printf("[webhook] ignoring GitHub event: %s\n", eventType)
 	}
 	return http.StatusOK
 }
 
-// secretFunc looks up the webhook secret for a request by extracting
-// the repository URL from the payload and finding the matching project.
-func (h *webhookHandler) secretFunc(payload []byte) string {
+func (h *webhookHandler) secretFuncGitHub(payload []byte) string {
 	repoURL := github.RepoURL(payload)
 	project := h.findProject(repoURL)
 	if project == nil {
@@ -59,19 +66,18 @@ func (h *webhookHandler) secretFunc(payload []byte) string {
 	return project.WebhookSecret
 }
 
-func (h *webhookHandler) handlePR(body []byte) {
+func (h *webhookHandler) handleGitHubPR(body []byte) {
 	var ev github.PullRequestEvent
 	if err := json.Unmarshal(body, &ev); err != nil {
-		fmt.Printf("[webhook] failed to parse PR event: %s\n", err)
+		fmt.Printf("[webhook] failed to parse GitHub PR event: %s\n", err)
 		return
 	}
 
-	// Only process merged PRs.
 	if ev.Action != "closed" || !ev.PR.Merged {
 		return
 	}
 
-	fmt.Printf("[webhook] PR merged: %s\n", ev.PR.Title)
+	fmt.Printf("[webhook] GitHub PR merged: %s\n", ev.PR.Title)
 
 	refs := webhook.ExtractIssueRefs(ev.PR.Title + " " + ev.PR.Body)
 	for _, ref := range refs {
@@ -79,10 +85,10 @@ func (h *webhookHandler) handlePR(body []byte) {
 	}
 }
 
-func (h *webhookHandler) handlePush(body []byte) {
+func (h *webhookHandler) handleGitHubPush(body []byte) {
 	var ev github.PushEvent
 	if err := json.Unmarshal(body, &ev); err != nil {
-		fmt.Printf("[webhook] failed to parse push event: %s\n", err)
+		fmt.Printf("[webhook] failed to parse GitHub push event: %s\n", err)
 		return
 	}
 
@@ -93,6 +99,66 @@ func (h *webhookHandler) handlePush(body []byte) {
 		}
 	}
 }
+
+// --- GitLab handlers ---
+
+func (h *webhookHandler) handleGitLabEvent(eventType string, payload []byte) int {
+	switch eventType {
+	case "Push Hook":
+		h.handleGitLabPush(payload)
+	case "Merge Request Hook":
+		h.handleGitLabMR(payload)
+	default:
+		fmt.Printf("[webhook] ignoring GitLab event: %s\n", eventType)
+	}
+	return http.StatusOK
+}
+
+func (h *webhookHandler) secretFuncGitLab(payload []byte) string {
+	repoURL := gitlab.RepoURL(payload)
+	project := h.findProject(repoURL)
+	if project == nil {
+		fmt.Printf("[webhook] no project found for GitLab repo: %s\n", repoURL)
+		return ""
+	}
+	return project.WebhookSecret
+}
+
+func (h *webhookHandler) handleGitLabPush(body []byte) {
+	var ev gitlab.PushEvent
+	if err := json.Unmarshal(body, &ev); err != nil {
+		fmt.Printf("[webhook] failed to parse GitLab push event: %s\n", err)
+		return
+	}
+
+	for _, commit := range ev.Commits {
+		refs := webhook.ExtractIssueRefs(commit.Message)
+		for _, ref := range refs {
+			h.linkCommitToIssue(ref, commit.ID, "", false)
+		}
+	}
+}
+
+func (h *webhookHandler) handleGitLabMR(body []byte) {
+	var ev gitlab.MergeRequestEvent
+	if err := json.Unmarshal(body, &ev); err != nil {
+		fmt.Printf("[webhook] failed to parse GitLab MR event: %s\n", err)
+		return
+	}
+
+	if ev.ObjectAttrs.Action != "merge" {
+		return
+	}
+
+	fmt.Printf("[webhook] GitLab MR merged: %s\n", ev.ObjectAttrs.Title)
+
+	refs := webhook.ExtractIssueRefs(ev.ObjectAttrs.Title + " " + ev.ObjectAttrs.Description)
+	for _, ref := range refs {
+		h.linkCommitToIssue(ref, ev.ObjectAttrs.MergeCommit, ev.ObjectAttrs.URL, true)
+	}
+}
+
+// --- Shared logic ---
 
 func (h *webhookHandler) linkCommitToIssue(ref, commitSHA, prURL string, autoTransition bool) {
 	// Try as bug ID or bug number.

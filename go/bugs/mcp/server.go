@@ -27,6 +27,16 @@ func NewServer(vnic ifs.IVNic) *Server {
 	return s
 }
 
+// CallTool invokes a registered tool by name with the given arguments.
+// Used by tests to exercise tool handlers without JSON-RPC framing.
+func (s *Server) CallTool(name string, args map[string]interface{}) (*CallToolResult, error) {
+	handler, ok := s.tools[name]
+	if !ok {
+		return nil, fmt.Errorf("unknown tool: %s", name)
+	}
+	return handler(args)
+}
+
 func (s *Server) Run() {
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Buffer(make([]byte, 0, 1024*1024), 1024*1024)
