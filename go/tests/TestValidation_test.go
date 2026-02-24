@@ -8,7 +8,10 @@ import (
 
 func testValidation(t *testing.T, client *mocks.BugsClient) {
 	testValidationBug(t, client)
+	testValidationFeature(t, client)
 	testValidationProject(t, client)
+	testValidationSprint(t, client)
+	testValidationAssignee(t, client)
 	testValidationDigest(t, client)
 	testValidationAutoID(t, client)
 }
@@ -34,6 +37,33 @@ func testValidationBug(t *testing.T, client *mocks.BugsClient) {
 	}
 }
 
+// testValidationFeature verifies required field validation on Feature
+func testValidationFeature(t *testing.T, client *mocks.BugsClient) {
+	// Missing title — should fail
+	featureNoTitle := map[string]interface{}{
+		"projectId": testStore.ProjectIDs[0],
+	}
+	_, err := client.Post("/bugs/20/Feature", featureNoTitle)
+	if err == nil {
+		t.Fatal("POST Feature without title should have failed")
+	}
+	if !strings.Contains(err.Error(), "Title is required") {
+		t.Fatalf("Expected 'Title is required' error, got: %v", err)
+	}
+
+	// Missing projectId — should fail
+	featureNoProject := map[string]interface{}{
+		"title": "Feature without project",
+	}
+	_, err = client.Post("/bugs/20/Feature", featureNoProject)
+	if err == nil {
+		t.Fatal("POST Feature without projectId should have failed")
+	}
+	if !strings.Contains(err.Error(), "ProjectId is required") {
+		t.Fatalf("Expected 'ProjectId is required' error, got: %v", err)
+	}
+}
+
 // testValidationProject verifies required field validation on Project
 func testValidationProject(t *testing.T, client *mocks.BugsClient) {
 	// Missing name — should fail
@@ -52,6 +82,48 @@ func testValidationProject(t *testing.T, client *mocks.BugsClient) {
 	_, err = client.Post("/bugs/20/Project", projNoKey)
 	if err == nil {
 		t.Fatal("POST Project without key should have failed")
+	}
+}
+
+// testValidationSprint verifies required field validation on Sprint
+func testValidationSprint(t *testing.T, client *mocks.BugsClient) {
+	// Missing name — should fail
+	sprintNoName := map[string]interface{}{
+		"projectId": testStore.ProjectIDs[0],
+	}
+	_, err := client.Post("/bugs/20/Sprint", sprintNoName)
+	if err == nil {
+		t.Fatal("POST Sprint without name should have failed")
+	}
+	if !strings.Contains(err.Error(), "Name is required") {
+		t.Fatalf("Expected 'Name is required' error, got: %v", err)
+	}
+
+	// Missing projectId — should fail
+	sprintNoProject := map[string]interface{}{
+		"name": "Sprint without project",
+	}
+	_, err = client.Post("/bugs/20/Sprint", sprintNoProject)
+	if err == nil {
+		t.Fatal("POST Sprint without projectId should have failed")
+	}
+	if !strings.Contains(err.Error(), "ProjectId is required") {
+		t.Fatalf("Expected 'ProjectId is required' error, got: %v", err)
+	}
+}
+
+// testValidationAssignee verifies required field validation on Assignee
+func testValidationAssignee(t *testing.T, client *mocks.BugsClient) {
+	// Missing name — should fail
+	assigneeNoName := map[string]interface{}{
+		"email": "noname@example.com",
+	}
+	_, err := client.Post("/bugs/20/Assignee", assigneeNoName)
+	if err == nil {
+		t.Fatal("POST Assignee without name should have failed")
+	}
+	if !strings.Contains(err.Error(), "Name is required") {
+		t.Fatalf("Expected 'Name is required' error, got: %v", err)
 	}
 }
 

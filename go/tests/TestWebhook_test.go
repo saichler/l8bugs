@@ -40,6 +40,9 @@ func testWebhook(t *testing.T, client *mocks.BugsClient) {
 	testWebhookMergedPRTransitionsBug(t, client, projectId)
 	testWebhookMergedPRTransitionsFeature(t, client, projectId)
 	testWebhookUnknownRepo(t, client)
+	testWebhookNonMergedPRIgnored(t, client, projectId)
+	testWebhookPushNoMatchingRef(t, client)
+	testWebhookPushNoRefInMessage(t, client, projectId)
 }
 
 // testWebhookMethodNotAllowed verifies GET requests are rejected with 405.
@@ -169,6 +172,77 @@ func testWebhookUnknownRepo(t *testing.T, client *mocks.BugsClient) {
 	}
 }
 
+// testWebhookNonMergedPRIgnored verifies that a closed but non-merged PR
+// does not update the bug (no commit linking, no status transition).
+func testWebhookNonMergedPRIgnored(t *testing.T, client *mocks.BugsClient, projectId string) {
+	// Create a bug at Open status.
+	bugId := ifs.NewUuid()
+	bug := map[string]interface{}{
+		"bugId":     bugId,
+		"projectId": projectId,
+		"title":     "Non-Merged PR Test Bug",
+		"priority":  2,
+		"severity":  2,
+	}
+	if _, err := client.Post("/bugs/20/Bug", bug); err != nil {
+		t.Fatalf("Failed to create bug: %v", err)
+	}
+
+	// Send a closed-but-not-merged PR event.
+	payload := nonMergedPRPayload(fmt.Sprintf("fixes %s", bugId), "Closed without merge", "deadbeef12345678")
+	status := sendWebhookRaw(t, client, "pull_request", webhookSecret, payload)
+	if status != http.StatusOK {
+		t.Fatalf("expected 200 for non-merged PR, got %d", status)
+	}
+
+	// Verify the bug was NOT updated (no linkedCommitSha).
+	entity := getEntity(t, client, "/bugs/20/Bug", "Bug", "bugId", bugId)
+	if entity["linkedCommitSha"] != nil && entity["linkedCommitSha"] != "" {
+		t.Fatalf("expected no linkedCommitSha for non-merged PR, got %v", entity["linkedCommitSha"])
+	}
+}
+
+// testWebhookPushNoMatchingRef verifies that a push referencing a nonexistent
+// bug/feature ID still returns 200 (no error, just silently unmatched).
+func testWebhookPushNoMatchingRef(t *testing.T, client *mocks.BugsClient) {
+	fakeId := ifs.NewUuid()
+	payload := pushPayload("1111222233334444", fmt.Sprintf("fixes %s", fakeId))
+	status := sendWebhookRaw(t, client, "push", webhookSecret, payload)
+	if status != http.StatusOK {
+		t.Fatalf("expected 200 for push with no matching ref, got %d", status)
+	}
+}
+
+// testWebhookPushNoRefInMessage verifies that a push with no issue reference
+// keywords in the commit message returns 200 and doesn't modify any entities.
+func testWebhookPushNoRefInMessage(t *testing.T, client *mocks.BugsClient, projectId string) {
+	// Create a bug to verify it stays unchanged.
+	bugId := ifs.NewUuid()
+	bug := map[string]interface{}{
+		"bugId":     bugId,
+		"projectId": projectId,
+		"title":     "No-Ref Message Test Bug",
+		"priority":  2,
+		"severity":  2,
+	}
+	if _, err := client.Post("/bugs/20/Bug", bug); err != nil {
+		t.Fatalf("Failed to create bug: %v", err)
+	}
+
+	// Push with a commit message that has no issue ref keywords.
+	payload := pushPayload("5555666677778888", "refactored logging module")
+	status := sendWebhookRaw(t, client, "push", webhookSecret, payload)
+	if status != http.StatusOK {
+		t.Fatalf("expected 200 for push with no refs, got %d", status)
+	}
+
+	// Bug should remain untouched.
+	entity := getEntity(t, client, "/bugs/20/Bug", "Bug", "bugId", bugId)
+	if entity["linkedCommitSha"] != nil && entity["linkedCommitSha"] != "" {
+		t.Fatalf("expected no linkedCommitSha for no-ref push, got %v", entity["linkedCommitSha"])
+	}
+}
+
 // --- Helpers ---
 
 // sendWebhookRaw sends a webhook POST request and returns the HTTP status code.
@@ -212,6 +286,27 @@ func pushPayloadForRepo(commitID, message, repo string) []byte {
 		"repository": map[string]interface{}{
 			"html_url":  repo,
 			"clone_url": repo + ".git",
+			"full_name": "test/webhook-test",
+		},
+	}
+	data, _ := json.Marshal(ev)
+	return data
+}
+
+// nonMergedPRPayload creates a GitHub closed-but-not-merged PR event payload.
+func nonMergedPRPayload(title, body, mergeCommitSHA string) []byte {
+	ev := map[string]interface{}{
+		"action": "closed",
+		"pull_request": map[string]interface{}{
+			"title":            title,
+			"body":             body,
+			"merged":           false,
+			"merge_commit_sha": mergeCommitSHA,
+			"html_url":         webhookRepo + "/pull/2",
+		},
+		"repository": map[string]interface{}{
+			"html_url":  webhookRepo,
+			"clone_url": webhookRepo + ".git",
 			"full_name": "test/webhook-test",
 		},
 	}

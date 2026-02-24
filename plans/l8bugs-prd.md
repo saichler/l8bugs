@@ -595,14 +595,26 @@ All features must have functional parity between desktop and mobile:
 
 ### 9.2 Webhook System
 
+**Architecture**: Inbound webhook handling uses a generic three-layer architecture extracted into `l8web`:
+1. **`l8web/webhook.NewHandler`** — Generic HTTP handler: POST-only enforcement, body reading, signature verification dispatch, event handler dispatch
+2. **`l8web/webhook.Provider`** interface — Provider-specific event type detection and signature verification (e.g., `webhook/github.Provider` for GitHub)
+3. **`l8web/webhook.SecretFunc`** — Per-request secret lookup (l8bugs looks up project by repository URL)
+
+Shared utilities in `l8web/webhook`: `VerifyHMACSHA256` (HMAC-SHA256 signature validation), `ExtractIssueRefs` (regex extraction of "fixes/closes/resolves" references).
+
+Registration uses `RestServer.RegisterHandler()` to mount the webhook at `/bugs/webhook/github`.
+
 **Outbound webhooks** (L8Bugs → external systems):
 - Issue created, updated, status changed, assigned, commented
 - Configurable per project with URL, secret, and event filter
 
 **Inbound webhooks** (external systems → L8Bugs):
-- GitHub/GitLab PR events → update issue status
-- CI/CD build results → attach to linked issues
-- Chat commands → create/update issues
+- GitHub push events → link commit SHA to referenced bug/feature
+- GitHub merged PR events → link PR URL and auto-transition bug (In Review → Resolved) or feature (In Review → Done)
+- Non-merged PRs and unknown repos are silently ignored
+- HMAC-SHA256 signature verification per project webhook secret
+- CI/CD build results → attach to linked issues (future)
+- Chat commands → create/update issues (future)
 
 ### 9.3 REST API
 
@@ -1038,108 +1050,119 @@ Layer8DReferenceRegistry.register({
 - **Mobile UI**: Full parity — same enums, columns, forms, reference config additions
 - **MCP handlers refactored**: Extracted enum parsers and digest handler into `parsers.go` to keep handlers.go under 500 lines
 
-### Phase 7: Testing
-Following the l8erp test patterns (`go/tests/`), implement comprehensive test coverage for all l8bugs services.
+### Phase 7: Testing ✓
+Comprehensive test coverage for all l8bugs services, following l8erp test patterns. All tests run through a single `TestAllServices` function using a shared topology with services vNic and web server vNic.
 
 #### 7.1 Test Infrastructure (`go/tests/`)
-- **TestInit.go**: Setup/teardown topology using `l8test` framework (`NewTestTopology`), global `topo` and `testStore` variables, log initialization
-- **StartWebserver.go**: Start HTTPS web server on test port with `common.PREFIX="/bugs/"`, register UI types, activate webpoints service
-- **TestAllService_test.go**: Main test entry point with `TestMain()` → `setup()`/`tear()`, single `TestAllServices()` function that:
+- **TestInit.go**: Setup/teardown topology using `l8test` framework (`NewTestTopology(4, ...)`), global `topo` and `testStore` variables
+- **StartWebserver.go**: Start HTTPS web server on test port with `common.PREFIX="/bugs/"`, register UI types, webhook handler, and webpoints service. Accepts optional `servicesNic` for webhook handler (test environments where services and web server run on different vNics)
+- **TestAllService_test.go**: Main test entry point with `TestMain()` → `setup()`/`tear()`, single `TestAllServices()` function that runs 11 sequential test phases:
   1. Drops all tables (clean slate)
   2. Activates all l8bugs services on services vNic
   3. Starts web server on web vNic (non-blocking)
-  4. Creates mock client, authenticates
-  5. Runs mock data phases
-  6. Runs service handler tests
-  7. Runs service getter tests
-  8. Runs CRUD lifecycle tests
-  9. Runs validation tests
-  10. Runs MCP protocol tests
+  4. Creates mock client, authenticates (`operator/operator`)
+  5. Runs mock data phases (3 phases: foundation, tracking, planning)
+  6. Verifies key entity counts (projects, bugs, features not empty)
+  7. Runs service handler tests
+  8. Runs service getter tests
+  9. Runs CRUD lifecycle tests
+  10. Runs validation tests
+  11. Runs business logic tests (status transitions, date validation)
+  12. Runs webhook integration tests
 
 #### 7.2 Mock Data Generation (`go/tests/mocks/`)
-- **client.go**: HTTP test client (BugsClient) with `Authenticate()`, `Post()`, `Get()`, `Put()`, `Delete()` methods
-- **store.go**: `MockDataStore` with ID slices for all 6 services: `ProjectIDs`, `BugIDs`, `FeatureIDs`, `SprintIDs`, `AssigneeIDs`, `DigestIDs`
-- **data.go**: Curated name arrays for realistic mock data (project names, bug titles, feature titles, component names, etc.)
-- **gen_foundation.go**: Generate BugsProject and BugsAssignee mock data (no dependencies)
-- **gen_tracking.go**: Generate Bug and Feature mock data (depends on ProjectIDs, AssigneeIDs) with flavorable status distributions
-- **gen_sprints.go**: Generate BugsSprint mock data (depends on ProjectIDs)
-- **gen_digests.go**: Generate BugsDigest mock data (depends on ProjectIDs)
-- **phases.go**: Phase orchestration — Phase 1: Foundation (projects, assignees), Phase 2: Tracking (bugs, features), Phase 3: Planning (sprints, digests)
-- **main.go**: `RunAllPhases()` entry point, `PrintSummary()`
+- **client.go**: HTTP test client (`BugsClient`) with `Authenticate()`, `Post()`, `Get()`, `Put()`, `Delete()`, `BaseURL()`, `HTTPClient()` methods
+- **store.go**: `MockDataStore` with ID slices for all 6 services
+- **data.go**: Curated name arrays for realistic mock data
+- **gen_foundation.go**: Generate BugsProject and BugsAssignee mock data
+- **gen_tracking.go**: Generate Bug and Feature mock data with flavorable status distributions
+- **gen_planning.go**: Generate BugsSprint and BugsDigest mock data
+- **phases.go**: Phase orchestration — Phase 1: Foundation, Phase 2: Tracking, Phase 3: Planning; `RunAllPhases()` entry point, `PrintSummary()`
 
 #### 7.3 Service Handler Tests (`TestServiceHandlers_test.go`)
-Verify every service's handler is registered and accessible via the vNic:
-- `bugs.Bugs(vnic)` → handler not nil
-- `features.Features(vnic)` → handler not nil
-- `projects.Projects(vnic)` → handler not nil
-- `sprints.Sprints(vnic)` → handler not nil
-- `assignees.Assignees(vnic)` → handler not nil
-- `digests.Digests(vnic)` → handler not nil
+Verify all 6 service handlers are registered and accessible via the vNic.
 
 #### 7.4 Service Getter Tests (`TestServiceGetters_test.go`)
-Verify every service's entity getter function works:
-- `bugs.Bug("test-id", vnic)` → no error
-- `features.Feature("test-id", vnic)` → no error
-- `projects.Project("test-id", vnic)` → no error
-- `sprints.Sprint("test-id", vnic)` → no error
-- `assignees.Assignee("test-id", vnic)` → no error
-- `digests.Digest("test-id", vnic)` → no error
+Verify all 6 service entity getter functions work correctly.
 
 #### 7.5 CRUD Lifecycle Tests (`TestCRUD_test.go`)
-End-to-end HTTP tests through the web server for each service:
-- **POST** (Create): Send valid entity via HTTP POST, verify 200/201, verify auto-generated ID in response
-- **GET** (Read): Fetch entity by ID via L8Query, verify fields match what was POSTed
-- **PUT** (Update): Modify entity fields, verify updated values persist
-- **DELETE**: Remove entity, verify subsequent GET returns empty/not-found
-- Test for all 6 services: BugsProject, Bug, Feature, BugsSprint, BugsAssignee, BugsDigest
+End-to-end HTTP tests through the web server for all 6 services (BugsProject, Bug, Feature, BugsSprint, BugsAssignee, BugsDigest):
+- POST → GET → PUT → DELETE lifecycle for each entity type
+- Verify auto-generated IDs, field persistence, and deletion
 
 #### 7.6 Validation Tests (`TestValidation_test.go`)
-Verify ServiceCallback validation rules reject invalid data:
-- **Required fields**: POST without required fields → error (e.g., Bug without title, Project without name/key)
-- **Status transitions**: Invalid transitions rejected (e.g., Bug "Closed" → "Open" if not allowed)
-- **ID auto-generation**: POST without primary key → ID auto-generated in response
+Required field validation for all 6 services:
+- **Bug**: Missing title → error, missing projectId → error
+- **Feature**: Missing title → error, missing projectId → error
+- **Project**: Missing name → error, missing key → error
+- **Sprint**: Missing name → error, missing projectId → error
+- **Assignee**: Missing name → error
+- **Digest**: Missing summary → error, missing projectId → error
+- **ID auto-generation**: POST without primary key → ID auto-generated
+- All error message text verified
 
-#### 7.7 MCP Protocol Tests (`TestMCP_test.go`)
-Verify MCP server JSON-RPC 2.0 protocol handling:
-- **tools/list**: Returns all 8 tools with correct schemas
-- **tools/call** for each tool: `list_issues`, `read_issue`, `create_issue`, `update_issue`, `add_comment`, `search_issues`, `assist_writing`, `generate_digest`
-- **Error handling**: Invalid tool name → error, missing required params → error
-- **Protocol**: Correct JSON-RPC 2.0 envelope (jsonrpc, id, result/error)
+#### 7.7 Business Logic Tests
+**Bug Status Transitions** (`TestBugTransitions_test.go`):
+- Happy path: Open → Triaged → InProgress → InReview → Resolved → Closed
+- Reopen path: Resolved → Reopened → Open
+- Terminal shortcuts: Open → Won't Fix, Triaged → Cannot Reproduce, etc.
+- Invalid transitions rejected with error messages
+- Terminal state enforcement: Closed, Won't Fix, Duplicate cannot transition
+- Auto-set initial status: POST without status → Open
+
+**Feature Status Transitions** (`TestFeatureTransitions_test.go`):
+- Happy path: Proposed → Triaged → Approved → InProgress → InReview → Done → Closed
+- Rejection: Proposed → Rejected
+- Deferral: Triaged → Deferred → Triaged
+- Review bounce: InReview → InProgress
+- Invalid transitions and terminal state enforcement
+
+**Sprint Logic** (`TestSprintLogic_test.go`):
+- Valid transitions: Planning → Active → Completed
+- Invalid transitions rejected
+- Date validation: EndDate must be after StartDate
 
 #### 7.8 Webhook Tests (`TestWebhook_test.go`)
-Verify GitHub webhook handler:
-- **Signature verification**: Valid HMAC-SHA256 → accepted, invalid → 401
-- **PR merge event**: Bug with matching branch transitions to Resolved
-- **Push event**: Commit SHA linked to matching bug/feature
-- **Unknown event**: Ignored gracefully (no error)
+Integration tests for the GitHub inbound webhook handler (uses l8web generic webhook infrastructure):
+- **Method enforcement**: GET → 405 Method Not Allowed
+- **Signature verification**: Invalid HMAC-SHA256 → 403 Forbidden (project lookup via L8Query by `repositoryUrl`)
+- **Push commit linking**: Push event with "fixes <bugId>" → `linkedCommitSha` set on bug
+- **PR auto-transition (Bug)**: Merged PR referencing bug in In Review → status transitions to Resolved, `linkedPrUrl` and `linkedCommitSha` set
+- **PR auto-transition (Feature)**: Merged PR referencing feature in In Review → status transitions to Done
+- **Unknown repo**: Push from unknown repository → 200 (silent ignore, no signature check)
+- **Non-merged PR ignored**: Closed but not merged PR → no entity modifications
+- **No matching ref**: Push referencing nonexistent bug/feature ID → 200 (silently unmatched)
+- **No ref in message**: Commit with no "fixes/closes/resolves" keywords → no entity modifications
 
 #### Directory Structure
 ```
 go/tests/
 ├── TestInit.go                      # Topology setup/teardown
-├── StartWebserver.go                # Web server for HTTP tests
-├── TestAllService_test.go           # Main test orchestrator
+├── StartWebserver.go                # Web server + webhook registration
+├── TestAllService_test.go           # Main test orchestrator (12 phases)
 ├── TestServiceHandlers_test.go      # Service handler registration tests
 ├── TestServiceGetters_test.go       # Service getter function tests
 ├── TestCRUD_test.go                 # End-to-end CRUD lifecycle tests
-├── TestValidation_test.go           # Validation rule tests
-├── TestMCP_test.go                  # MCP protocol tests
-├── TestWebhook_test.go             # Webhook handler tests
+├── TestValidation_test.go           # Required field validation (all 6 services)
+├── TestBusinessLogic_test.go        # Shared helpers (advanceStatus, newBug, etc.)
+├── TestBugTransitions_test.go       # Bug status machine tests
+├── TestFeatureTransitions_test.go   # Feature status machine tests
+├── TestSprintLogic_test.go          # Sprint status + date validation tests
+├── TestWebhook_test.go             # Webhook integration tests (9 tests)
 └── mocks/
     ├── client.go                    # HTTP test client
     ├── store.go                     # MockDataStore (ID slices)
     ├── data.go                      # Curated name arrays
     ├── gen_foundation.go            # Project + Assignee generators
     ├── gen_tracking.go              # Bug + Feature generators
-    ├── gen_sprints.go               # Sprint generators
-    ├── gen_digests.go               # Digest generators
-    ├── phases.go                    # Phase orchestration
-    └── main.go                      # RunAllPhases + PrintSummary
+    ├── gen_planning.go              # Sprint + Digest generators
+    └── phases.go                    # Phase orchestration + RunAllPhases
 ```
 
 ### Phase 8: Advanced Features (Future)
 - Natural language search and Q&A
-- Inbound webhook system (GitHub/GitLab PR events, CI/CD results)
+- GitLab webhook provider (reuse l8web generic webhook infrastructure with a new `webhook.Provider` implementation)
+- CI/CD build result webhooks → attach results to linked issues
 - Import from Jira/GitHub/Linear
 - AI effort estimation learning feedback loop (compare actual vs estimated)
 - Sprint completion prediction and anomaly detection
