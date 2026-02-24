@@ -147,6 +147,15 @@ func PostEntity[T any](serviceName string, serviceArea byte, entity *T, vnic ifs
 	return entity, nil
 }
 
+func QueryEntities[T any](serviceName string, serviceArea byte, queryText string, vnic ifs.IVNic) ([]*T, error) {
+	query := &l8api.L8Query{Text: queryText}
+	resp := vnic.Request("", serviceName, serviceArea, ifs.GET, query, 30)
+	if resp.Error() != nil {
+		return nil, resp.Error()
+	}
+	return extractElements[T](resp.Elements()), nil
+}
+
 func EntityExists[T any](serviceName string, serviceArea byte, filter *T, vnic ifs.IVNic) (bool, error) {
 	existing, err := GetEntities[T](serviceName, serviceArea, filter, vnic)
 	if err != nil {

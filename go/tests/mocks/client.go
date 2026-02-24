@@ -35,6 +35,16 @@ func NewBugsClient(baseURL string, httpClient *http.Client) *BugsClient {
 	return &BugsClient{baseURL: baseURL, client: httpClient}
 }
 
+// BaseURL returns the client's base URL for constructing custom endpoints.
+func (c *BugsClient) BaseURL() string {
+	return c.baseURL
+}
+
+// HTTPClient returns the underlying HTTP client for raw requests.
+func (c *BugsClient) HTTPClient() *http.Client {
+	return c.client
+}
+
 // L8QueryText builds a JSON-encoded L8Query with the text field
 func L8QueryText(queryText string) string {
 	q := map[string]interface{}{

@@ -16,13 +16,14 @@ package tests
 
 import (
 	"github.com/saichler/l8bugs/go/bugs/common"
+	"github.com/saichler/l8bugs/go/bugs/webhook"
 	"github.com/saichler/l8bugs/go/bugs/website"
 	"github.com/saichler/l8bus/go/overlay/health"
 	"github.com/saichler/l8types/go/ifs"
 	"github.com/saichler/l8web/go/web/server"
 )
 
-func startWebServer(port int, nic ifs.IVNic) ifs.IWebServer {
+func startWebServer(port int, nic ifs.IVNic, servicesNic ...ifs.IVNic) ifs.IWebServer {
 	// Register UI types on the vNic's resources
 	website.RegisterTypes(nic.Resources())
 
@@ -43,6 +44,14 @@ func startWebServer(port int, nic ifs.IVNic) ifs.IWebServer {
 		ws := hs.WebService()
 		svr.RegisterWebService(ws, nic)
 	}
+
+	// Register webhook handler. Use servicesNic if provided (test environments
+	// where services and web server run on different vNics).
+	webhookNic := nic
+	if len(servicesNic) > 0 {
+		webhookNic = servicesNic[0]
+	}
+	webhook.Register(svr.(*server.RestServer), webhookNic)
 
 	// Activate the webpoints service
 	sla := ifs.NewServiceLevelAgreement(&server.WebService{}, ifs.WebService, 0, false, nil)

@@ -63,7 +63,7 @@ func TestAllServices(t *testing.T) {
 
 	// 2. Start web server on the web service vNic (non-blocking)
 	port := 9443
-	startWebServer(port, webServiceVnic)
+	startWebServer(port, webServiceVnic, erpServicesVnic)
 	time.Sleep(10 * time.Second)
 
 	// 3. Create mock client pointing to web server
@@ -111,4 +111,7 @@ func TestAllServices(t *testing.T) {
 
 	// 10. Test business logic (status transitions, date validation)
 	testBusinessLogic(t, client)
+
+	// 11. Test webhook integration
+	testWebhook(t, client)
 }

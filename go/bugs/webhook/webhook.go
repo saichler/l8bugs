@@ -144,8 +144,8 @@ func (h *webhookHandler) findProject(repoURL string) *l8bugs.BugsProject {
 	if repoURL == "" {
 		return nil
 	}
-	projects, err := common.GetEntities(projectService, serviceArea,
-		&l8bugs.BugsProject{RepositoryUrl: repoURL}, h.vnic)
+	query := fmt.Sprintf("select * from BugsProject where repositoryUrl='%s'", repoURL)
+	projects, err := common.QueryEntities[l8bugs.BugsProject](projectService, serviceArea, query, h.vnic)
 	if err != nil || len(projects) == 0 {
 		return nil
 	}
