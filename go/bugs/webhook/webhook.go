@@ -1,17 +1,16 @@
 package webhook
 
 import (
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/saichler/l8bugs/go/bugs/common"
 	l8bugs "github.com/saichler/l8bugs/go/types/l8bugs"
 	"github.com/saichler/l8types/go/ifs"
-	"io"
-	"net/http"
-	"strings"
+	"github.com/saichler/l8web/go/web/server"
+	"github.com/saichler/l8web/go/web/webhook"
+	"github.com/saichler/l8web/go/web/webhook/github"
 )
 
 const (
@@ -21,100 +20,47 @@ const (
 	serviceArea    = byte(20)
 )
 
-// Register registers the GitHub webhook handler on the default HTTP mux.
-func Register(vnic ifs.IVNic) {
-	handler := &webhookHandler{vnic: vnic}
-	http.HandleFunc("/bugs/webhook/github", handler.handle)
-	fmt.Println("[webhook] GitHub webhook registered at /bugs/webhook/github")
+// Register registers the GitHub webhook handler on the REST server.
+func Register(svr *server.RestServer, vnic ifs.IVNic) {
+	h := &webhookHandler{vnic: vnic}
+	provider := &github.Provider{}
+	handler := webhook.NewHandler(provider, h.handleEvent, h.secretFunc)
+	svr.RegisterHandler("webhook/github", handler)
+	fmt.Println("[webhook] GitHub webhook registered")
 }
 
 type webhookHandler struct {
 	vnic ifs.IVNic
 }
 
-// GitHub webhook payload types (minimal).
-
-type ghPushEvent struct {
-	Ref     string     `json:"ref"`
-	Commits []ghCommit `json:"commits"`
-	Repo    ghRepo     `json:"repository"`
-}
-
-type ghCommit struct {
-	ID      string `json:"id"`
-	Message string `json:"message"`
-}
-
-type ghPREvent struct {
-	Action string `json:"action"`
-	PR     ghPR   `json:"pull_request"`
-	Repo   ghRepo `json:"repository"`
-}
-
-type ghPR struct {
-	Title      string `json:"title"`
-	Body       string `json:"body"`
-	Merged     bool   `json:"merged"`
-	MergeCommit string `json:"merge_commit_sha"`
-	HTMLURL    string `json:"html_url"`
-}
-
-type ghRepo struct {
-	CloneURL string `json:"clone_url"`
-	HTMLURL  string `json:"html_url"`
-	FullName string `json:"full_name"`
-}
-
-func (h *webhookHandler) handle(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-		return
+// handleEvent dispatches a webhook event to the appropriate handler.
+// Returns an HTTP status code.
+func (h *webhookHandler) handleEvent(eventType string, payload []byte) int {
+	switch eventType {
+	case "pull_request":
+		h.handlePR(payload)
+	case "push":
+		h.handlePush(payload)
+	default:
+		fmt.Printf("[webhook] ignoring event: %s\n", eventType)
 	}
+	return http.StatusOK
+}
 
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "failed to read body", http.StatusBadRequest)
-		return
-	}
-
-	event := r.Header.Get("X-GitHub-Event")
-	if event == "" {
-		http.Error(w, "missing X-GitHub-Event header", http.StatusBadRequest)
-		return
-	}
-
-	// Extract repo URL from payload to find matching project.
-	repoURL := extractRepoURL(body)
+// secretFunc looks up the webhook secret for a request by extracting
+// the repository URL from the payload and finding the matching project.
+func (h *webhookHandler) secretFunc(payload []byte) string {
+	repoURL := github.RepoURL(payload)
 	project := h.findProject(repoURL)
 	if project == nil {
 		fmt.Printf("[webhook] no project found for repo: %s\n", repoURL)
-		w.WriteHeader(http.StatusOK)
-		return
+		return ""
 	}
-
-	// Verify HMAC signature if webhook secret is configured.
-	if project.WebhookSecret != "" {
-		sig := r.Header.Get("X-Hub-Signature-256")
-		if !verifySignature(body, sig, project.WebhookSecret) {
-			http.Error(w, "invalid signature", http.StatusForbidden)
-			return
-		}
-	}
-
-	switch event {
-	case "pull_request":
-		h.handlePR(body)
-	case "push":
-		h.handlePush(body)
-	default:
-		fmt.Printf("[webhook] ignoring event: %s\n", event)
-	}
-
-	w.WriteHeader(http.StatusOK)
+	return project.WebhookSecret
 }
 
 func (h *webhookHandler) handlePR(body []byte) {
-	var ev ghPREvent
+	var ev github.PullRequestEvent
 	if err := json.Unmarshal(body, &ev); err != nil {
 		fmt.Printf("[webhook] failed to parse PR event: %s\n", err)
 		return
@@ -127,22 +73,21 @@ func (h *webhookHandler) handlePR(body []byte) {
 
 	fmt.Printf("[webhook] PR merged: %s\n", ev.PR.Title)
 
-	// Extract issue refs from PR title and body.
-	refs := ExtractIssueRefs(ev.PR.Title + " " + ev.PR.Body)
+	refs := webhook.ExtractIssueRefs(ev.PR.Title + " " + ev.PR.Body)
 	for _, ref := range refs {
 		h.linkCommitToIssue(ref, ev.PR.MergeCommit, ev.PR.HTMLURL, true)
 	}
 }
 
 func (h *webhookHandler) handlePush(body []byte) {
-	var ev ghPushEvent
+	var ev github.PushEvent
 	if err := json.Unmarshal(body, &ev); err != nil {
 		fmt.Printf("[webhook] failed to parse push event: %s\n", err)
 		return
 	}
 
 	for _, commit := range ev.Commits {
-		refs := ExtractIssueRefs(commit.Message)
+		refs := webhook.ExtractIssueRefs(commit.Message)
 		for _, ref := range refs {
 			h.linkCommitToIssue(ref, commit.ID, "", false)
 		}
@@ -205,34 +150,4 @@ func (h *webhookHandler) findProject(repoURL string) *l8bugs.BugsProject {
 		return nil
 	}
 	return projects[0]
-}
-
-func extractRepoURL(body []byte) string {
-	var payload struct {
-		Repo struct {
-			CloneURL string `json:"clone_url"`
-			HTMLURL  string `json:"html_url"`
-		} `json:"repository"`
-	}
-	if err := json.Unmarshal(body, &payload); err != nil {
-		return ""
-	}
-	if payload.Repo.HTMLURL != "" {
-		return payload.Repo.HTMLURL
-	}
-	return payload.Repo.CloneURL
-}
-
-func verifySignature(payload []byte, signature, secret string) bool {
-	if !strings.HasPrefix(signature, "sha256=") {
-		return false
-	}
-	sig, err := hex.DecodeString(signature[7:])
-	if err != nil {
-		return false
-	}
-	mac := hmac.New(sha256.New, []byte(secret))
-	mac.Write(payload)
-	expected := mac.Sum(nil)
-	return hmac.Equal(sig, expected)
 }
