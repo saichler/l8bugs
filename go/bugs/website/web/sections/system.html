@@ -94,11 +94,7 @@ limitations under the License.
 
     <!-- Module Tabs -->
     <div class="l8-module-tabs">
-        <button class="l8-module-tab active" data-module="tracking">
-            <span class="tab-icon">&#x1F41B;</span>
-            <span class="tab-label">Tracking</span>
-        </button>
-        <button class="l8-module-tab" data-module="health">
+        <button class="l8-module-tab active" data-module="health">
             <span class="tab-icon">&#x1F49A;</span>
             <span class="tab-label">Health</span>
         </button>
@@ -114,13 +110,18 @@ limitations under the License.
             <span class="tab-icon">&#x1F4CB;</span>
             <span class="tab-label">Logs</span>
         </button>
+        <button class="l8-module-tab" data-module="tracking">
+            <span class="tab-icon">&#x1F41B;</span>
+            <span class="tab-label">Tracking</span>
+        </button>
     </div>
 
     <div class="section-content">
         <!-- Tracking Module -->
-        <div class="l8-module-content active" data-module="tracking">
+        <div class="l8-module-content" data-module="tracking">
             <nav class="l8-subnav">
-                <a class="l8-subnav-item active" data-service="bugs"><span class="subnav-icon">&#x1F41B;</span><span class="subnav-label">Bugs</span></a>
+                <a class="l8-subnav-item active" data-service="dashboard"><span class="subnav-icon">&#x1F4CA;</span><span class="subnav-label">Dashboard</span></a>
+                <a class="l8-subnav-item" data-service="bugs"><span class="subnav-icon">&#x1F41B;</span><span class="subnav-label">Bugs</span></a>
                 <a class="l8-subnav-item" data-service="features"><span class="subnav-icon">&#x2728;</span><span class="subnav-label">Features</span></a>
                 <a class="l8-subnav-item" data-service="projects"><span class="subnav-icon">&#x1F4C1;</span><span class="subnav-label">Projects</span></a>
                 <a class="l8-subnav-item" data-service="assignees"><span class="subnav-icon">&#x1F464;</span><span class="subnav-label">Assignees</span></a>
@@ -128,7 +129,14 @@ limitations under the License.
                 <a class="l8-subnav-item" data-service="triage"><span class="subnav-icon">&#x1F916;</span><span class="subnav-label">Triage</span></a>
             </nav>
             <div class="l8-service-content">
-                <div class="l8-service-view active" data-service="bugs">
+                <div class="l8-service-view active" data-service="dashboard">
+                    <div class="l8-dashboard-refresh">
+                        <button class="l8-dashboard-refresh-btn" onclick="L8Dashboard.refresh()">&#x21BB; Refresh</button>
+                    </div>
+                    <div class="l8-dashboard-grid" id="dashboard-widgets"></div>
+                    <div class="l8-dashboard-charts" id="dashboard-charts"></div>
+                </div>
+                <div class="l8-service-view" data-service="bugs">
                     <div class="l8-view-switcher-slot" id="tracking-bugs-view-switcher"></div>
                     <div class="l8-table-container" id="tracking-bugs-table-container"></div>
                 </div>
@@ -156,7 +164,7 @@ limitations under the License.
         </div>
 
         <!-- Health Module -->
-        <div class="l8-module-content" data-module="health">
+        <div class="l8-module-content active" data-module="health">
             <div class="l8-table-container" id="health-table-container"></div>
         </div>
 

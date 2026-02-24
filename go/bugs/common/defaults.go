@@ -23,8 +23,8 @@ const (
 	PREFIX         = "/bugs/"
 )
 
-var DB_CREDS = "postgres"
-var DB_NAME = "l8bugs"
+var DB_CREDS = "admin"
+var DB_NAME = "admin"
 
 var dbInstance *sql.DB
 var dbMtx = &sync.Mutex{}

@@ -20,27 +20,32 @@ limitations under the License.
 
     <!-- Module Tabs -->
     <div class="section-tabs">
-        <button class="section-tab active" data-module="tracking">Tracking</button>
-        <button class="section-tab" data-module="health">Health</button>
+        <button class="section-tab active" data-module="health">Health</button>
         <button class="section-tab" data-module="security">Security</button>
         <button class="section-tab" data-module="modules">Modules</button>
+        <button class="section-tab" data-module="tracking">Tracking</button>
     </div>
 
     <!-- Tracking Content -->
-    <div id="system-tracking-content">
+    <div id="system-tracking-content" style="display:none;">
         <div class="section-tabs" id="tracking-service-tabs">
-            <button class="section-tab active" data-service="bugs">Bugs</button>
+            <button class="section-tab active" data-service="dashboard">Dashboard</button>
+            <button class="section-tab" data-service="bugs">Bugs</button>
             <button class="section-tab" data-service="features">Features</button>
             <button class="section-tab" data-service="projects">Projects</button>
             <button class="section-tab" data-service="assignees">Assignees</button>
             <button class="section-tab" data-service="sprints">Sprints</button>
             <button class="section-tab" data-service="triage">Triage</button>
         </div>
-        <div id="system-tracking-table"></div>
+        <div id="system-tracking-dashboard">
+            <div class="l8-dashboard-grid" id="mobile-dashboard-widgets"></div>
+            <div class="l8-dashboard-charts" id="mobile-dashboard-charts"></div>
+        </div>
+        <div id="system-tracking-table" style="display:none;"></div>
     </div>
 
     <!-- Health Content -->
-    <div id="system-health-content" style="display:none;">
+    <div id="system-health-content">
         <div id="system-health-table"></div>
     </div>
 
@@ -64,9 +69,9 @@ limitations under the License.
 var systemHealthTable = null;
 var systemSecurityTable = null;
 var systemTrackingTable = null;
-var currentSystemModule = 'tracking';
+var currentSystemModule = 'health';
 var currentSecurityService = 'users';
-var currentTrackingService = 'bugs';
+var currentTrackingService = 'dashboard';
 var healthRawDataMap = new Map();
 
 var HEALTH_COLUMNS = [
@@ -209,6 +214,19 @@ function transformHealthItem(item) {
 
 function loadTrackingService(serviceName) {
     currentTrackingService = serviceName;
+    var dashboardDiv = document.getElementById('system-tracking-dashboard');
+    var tableDiv = document.getElementById('system-tracking-table');
+
+    if (serviceName === 'dashboard') {
+        dashboardDiv.style.display = '';
+        tableDiv.style.display = 'none';
+        if (window.L8Dashboard) L8Dashboard.initialize('mobile-dashboard-widgets', 'mobile-dashboard-charts');
+        return;
+    }
+
+    dashboardDiv.style.display = 'none';
+    tableDiv.style.display = '';
+
     var config = TRACKING_SERVICES[serviceName];
     var forms = (window.MobileL8Tracking && MobileL8Tracking.forms) ? MobileL8Tracking.forms : {};
     var primaryKeys = (window.MobileL8Tracking && MobileL8Tracking.primaryKeys) ? MobileL8Tracking.primaryKeys : {};
@@ -225,7 +243,7 @@ function loadTrackingService(serviceName) {
 }
 
 function initMobileSystem() {
-    loadTrackingService('bugs');
+    loadSystemHealth();
 
     document.querySelectorAll('#system-section > .section-tabs .section-tab').forEach(function(tab) {
         tab.addEventListener('click', function() {

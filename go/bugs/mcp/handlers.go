@@ -3,6 +3,7 @@ package mcp
 import (
 	"fmt"
 	"github.com/saichler/l8bugs/go/bugs/common"
+	"github.com/saichler/l8bugs/go/bugs/triage"
 	l8bugs "github.com/saichler/l8bugs/go/types/l8bugs"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
@@ -379,6 +380,37 @@ func (s *Server) handleSearchIssues(args map[string]interface{}) (*CallToolResul
 func matchesQuery(query, title, description string) bool {
 	return strings.Contains(strings.ToLower(title), query) ||
 		strings.Contains(strings.ToLower(description), query)
+}
+
+// --- assist_writing ---
+
+func (s *Server) handleAssistWriting(args map[string]interface{}) (*CallToolResult, error) {
+	action := getStr(args, "action")
+	input := getStr(args, "input")
+	title := getStr(args, "title")
+
+	if action == "" {
+		return nil, fmt.Errorf("action is required")
+	}
+	if input == "" {
+		return nil, fmt.Errorf("input is required")
+	}
+
+	triager := triage.Get()
+	if triager == nil || !triager.Available() {
+		return nil, fmt.Errorf("AI writing assistance unavailable")
+	}
+
+	result, err := triager.AssistWriting(&triage.WriteRequest{
+		Action: action,
+		Input:  input,
+		Title:  title,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return textResult(result.Output), nil
 }
 
 // --- enum parsers ---

@@ -92,6 +92,19 @@ func (s *Server) registerTools() {
 				Required: []string{"query"},
 			},
 		},
+		{
+			Name:        "assist_writing",
+			Description: "AI writing assistance for issue fields. Generates or improves text for bug/feature descriptions, steps to reproduce, acceptance criteria, or comment summaries.",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"action": {Type: "string", Description: "Writing action to perform", Enum: []string{"suggest_steps", "improve_description", "generate_acceptance_criteria", "summarize_comments"}},
+					"input":  {Type: "string", Description: "The text to improve or use as context"},
+					"title":  {Type: "string", Description: "Issue title for additional context"},
+				},
+				Required: []string{"action", "input"},
+			},
+		},
 	}
 
 	s.tools["list_issues"] = s.handleListIssues
@@ -100,4 +113,5 @@ func (s *Server) registerTools() {
 	s.tools["update_issue"] = s.handleUpdateIssue
 	s.tools["add_comment"] = s.handleAddComment
 	s.tools["search_issues"] = s.handleSearchIssues
+	s.tools["assist_writing"] = s.handleAssistWriting
 }

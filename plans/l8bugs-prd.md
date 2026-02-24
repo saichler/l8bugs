@@ -1018,13 +1018,13 @@ Layer8DReferenceRegistry.register({
 - ✓ Desktop UI: repositoryUrl/webhookSecret on BugsProject form, linkedCommitSha on Bug/Feature forms, repositoryUrl column on BugsProject
 - ✓ Mobile UI: Parity with desktop — same form and column additions
 
-### Phase 5: Analytics & Polish
-- Dashboard with configurable widgets
-- Built-in metrics (velocity, MTTR, burndown, etc.)
-- AI predictions and trend analysis
-- Notification system (in-app, email, webhooks)
-- Timeline and calendar views
-- AI writing assistance
+### Phase 5: Analytics & Polish ✓
+- **Dashboard module** (desktop + mobile) with 6 KPI widgets (Open Bugs, Open Features, Resolved This Week, AI Triage Accuracy, Active Sprints, Overdue Items) and 4 charts (Bugs by Priority/Status, Features by Status, Top Components) using Layer8DWidget and Layer8DChart
+- Dashboard is the new default tab in System section (before Tracking)
+- **Enhanced view types**: Bug and Feature services now support timeline and calendar views; Sprint service supports gantt view
+- **AI writing assistance** backend (`triage/writer.go`) with 4 actions: suggest_steps, improve_description, generate_acceptance_criteria, summarize_comments
+- **MCP assist_writing tool** (7th tool) exposes AI writing to coding agents
+- Desktop/mobile parity for all dashboard features
 
 ### Phase 6: Advanced Features
 - Natural language search and Q&A

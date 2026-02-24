@@ -22,20 +22,33 @@ limitations under the License.
     // 1. Bootstrap using shared factory
     Layer8DModuleFactory.create({
         namespace: 'L8Sys',
-        defaultModule: 'tracking',
-        defaultService: 'bugs',
-        sectionSelector: 'tracking',
+        defaultModule: 'health',
+        defaultService: 'dashboard',
+        sectionSelector: 'health',
         initializerName: 'initializeL8Sys',
         requiredNamespaces: ['L8Security', 'L8Tracking']
     });
 
     // 2. Initialize Health Monitor and Modules Settings when System section loads
     var origInit = window.initializeL8Sys;
+    var _dashboardHooked = false;
     window.initializeL8Sys = function() {
         if (origInit) origInit();
         if (window.L8Health) L8Health.initialize();
         if (window.L8SysModules) L8SysModules.initialize();
         if (window.L8Logs) L8Logs.initialize();
+
+        // Initialize dashboard when Tracking module's dashboard service becomes active
+        if (!_dashboardHooked && L8Sys.loadServiceView) {
+            _dashboardHooked = true;
+            var origLoadService = L8Sys.loadServiceView;
+            L8Sys.loadServiceView = function(moduleKey, serviceKey) {
+                origLoadService.call(L8Sys, moduleKey, serviceKey);
+                if (moduleKey === 'tracking' && serviceKey === 'dashboard' && window.L8Dashboard) {
+                    L8Dashboard.initialize();
+                }
+            };
+        }
     };
 
     // 3. Override CRUD methods to route to custom handlers per model

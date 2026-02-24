@@ -23,60 +23,6 @@ limitations under the License.
 
     // SYS Module Configuration
     L8Sys.modules = {
-        'tracking': {
-            label: 'Tracking',
-            icon: '\uD83D\uDC1B',
-            services: [
-                { key: 'bugs', label: 'Bugs', icon: '\uD83D\uDC1B',
-                  endpoint: '/20/Bug', model: 'Bug',
-                  supportedViews: ['table', 'kanban'],
-                  viewConfig: {
-                      laneField: 'status',
-                      lanes: {
-                          1: { label: 'Open', color: '#f59e0b' },
-                          2: { label: 'Triaged', color: '#0ea5e9' },
-                          3: { label: 'In Progress', color: '#8b5cf6' },
-                          4: { label: 'In Review', color: '#6366f1' },
-                          5: { label: 'Resolved', color: '#22c55e' },
-                          6: { label: 'Closed', color: '#64748b' }
-                      },
-                      cardTitle: 'title',
-                      cardSubtitle: 'bugNumber',
-                      cardFields: ['priority', 'severity', 'assigneeId']
-                  }
-                },
-                { key: 'features', label: 'Features', icon: '\u2728',
-                  endpoint: '/20/Feature', model: 'Feature',
-                  supportedViews: ['table', 'kanban'],
-                  viewConfig: {
-                      laneField: 'status',
-                      lanes: {
-                          1: { label: 'Proposed', color: '#f59e0b' },
-                          2: { label: 'Triaged', color: '#0ea5e9' },
-                          3: { label: 'Approved', color: '#22c55e' },
-                          4: { label: 'In Progress', color: '#8b5cf6' },
-                          5: { label: 'In Review', color: '#6366f1' },
-                          6: { label: 'Done', color: '#10b981' },
-                          7: { label: 'Closed', color: '#64748b' }
-                      },
-                      cardTitle: 'title',
-                      cardSubtitle: 'featureNumber',
-                      cardFields: ['priority', 'assigneeId']
-                  }
-                },
-                { key: 'projects', label: 'Projects', icon: '\uD83D\uDCC1',
-                  endpoint: '/20/Project', model: 'BugsProject' },
-                { key: 'assignees', label: 'Assignees', icon: '\uD83D\uDC64',
-                  endpoint: '/20/Assignee', model: 'BugsAssignee' },
-                { key: 'sprints', label: 'Sprints', icon: '\uD83C\uDFC3',
-                  endpoint: '/20/Sprint', model: 'BugsSprint' },
-                { key: 'triage', label: 'Triage Inbox', icon: '\uD83E\uDD16',
-                  endpoint: '/20/Bug', model: 'Bug',
-                  supportedViews: ['table'],
-                  defaultFilter: { triageStatus: 3, status: 1 }
-                }
-            ]
-        },
         'health': {
             label: 'Health',
             icon: '💚',
@@ -100,6 +46,79 @@ limitations under the License.
             label: 'Logs',
             icon: '📋',
             services: []
+        },
+        'tracking': {
+            label: 'Tracking',
+            icon: '\uD83D\uDC1B',
+            services: [
+                { key: 'dashboard', label: 'Dashboard', icon: '\uD83D\uDCCA',
+                  customRender: true
+                },
+                { key: 'bugs', label: 'Bugs', icon: '\uD83D\uDC1B',
+                  endpoint: '/20/Bug', model: 'Bug',
+                  supportedViews: ['table', 'kanban', 'timeline', 'calendar'],
+                  viewConfig: {
+                      laneField: 'status',
+                      lanes: {
+                          1: { label: 'Open', color: '#f59e0b' },
+                          2: { label: 'Triaged', color: '#0ea5e9' },
+                          3: { label: 'In Progress', color: '#8b5cf6' },
+                          4: { label: 'In Review', color: '#6366f1' },
+                          5: { label: 'Resolved', color: '#22c55e' },
+                          6: { label: 'Closed', color: '#64748b' }
+                      },
+                      cardTitle: 'title',
+                      cardSubtitle: 'bugNumber',
+                      cardFields: ['priority', 'severity', 'assigneeId'],
+                      dateField: 'createdDate',
+                      titleField: 'title',
+                      actorField: 'assigneeId',
+                      calendarDateField: 'dueDate'
+                  }
+                },
+                { key: 'features', label: 'Features', icon: '\u2728',
+                  endpoint: '/20/Feature', model: 'Feature',
+                  supportedViews: ['table', 'kanban', 'timeline', 'calendar'],
+                  viewConfig: {
+                      laneField: 'status',
+                      lanes: {
+                          1: { label: 'Proposed', color: '#f59e0b' },
+                          2: { label: 'Triaged', color: '#0ea5e9' },
+                          3: { label: 'Approved', color: '#22c55e' },
+                          4: { label: 'In Progress', color: '#8b5cf6' },
+                          5: { label: 'In Review', color: '#6366f1' },
+                          6: { label: 'Done', color: '#10b981' },
+                          7: { label: 'Closed', color: '#64748b' }
+                      },
+                      cardTitle: 'title',
+                      cardSubtitle: 'featureNumber',
+                      cardFields: ['priority', 'assigneeId'],
+                      dateField: 'createdDate',
+                      titleField: 'title',
+                      actorField: 'assigneeId',
+                      calendarDateField: 'dueDate'
+                  }
+                },
+                { key: 'projects', label: 'Projects', icon: '\uD83D\uDCC1',
+                  endpoint: '/20/Project', model: 'BugsProject' },
+                { key: 'assignees', label: 'Assignees', icon: '\uD83D\uDC64',
+                  endpoint: '/20/Assignee', model: 'BugsAssignee' },
+                { key: 'sprints', label: 'Sprints', icon: '\uD83C\uDFC3',
+                  endpoint: '/20/Sprint', model: 'BugsSprint',
+                  supportedViews: ['table', 'gantt'],
+                  viewConfig: {
+                      startDateField: 'startDate',
+                      endDateField: 'endDate',
+                      titleField: 'name',
+                      progressField: 'completedPoints'
+                  }
+                },
+                { key: 'triage', label: 'Triage Inbox', icon: '\uD83E\uDD16',
+                  endpoint: '/20/Bug', model: 'Bug',
+                  supportedViews: ['table'],
+                  defaultFilter: { triageStatus: 3, status: 1 }
+                }
+            ]
         }
     };
 

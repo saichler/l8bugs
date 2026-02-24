@@ -127,9 +127,11 @@ limitations under the License.
                 view.classList.toggle('active', view.dataset.service === serviceKey);
             });
 
-            const tableId = `${moduleKey}-${serviceKey}-table`;
-            if (!moduleNS._state.serviceTables[tableId]) {
-                Layer8DServiceRegistry.initializeServiceTable(moduleNS, parentModule, moduleKey, service, tableId);
+            if (!service.customRender) {
+                const tableId = `${moduleKey}-${serviceKey}-table`;
+                if (!moduleNS._state.serviceTables[tableId]) {
+                    Layer8DServiceRegistry.initializeServiceTable(moduleNS, parentModule, moduleKey, service, tableId);
+                }
             }
         };
 
