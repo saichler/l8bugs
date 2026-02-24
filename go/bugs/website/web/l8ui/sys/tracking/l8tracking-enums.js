@@ -106,6 +106,22 @@
         ['Completed', 'completed', 'layer8d-status-inactive']
     ]);
 
+    const DIGEST_PERIOD = factory.create([
+        ['Unspecified', null, ''],
+        ['Daily', 'daily', 'layer8d-status-active'],
+        ['Weekly', 'weekly', 'layer8d-status-active'],
+        ['Custom', 'custom', 'layer8d-status-pending']
+    ]);
+
+    const WEBHOOK_EVENT_TYPE = factory.create([
+        ['Unspecified', null, ''],
+        ['Issue Created', 'issue-created', ''],
+        ['Issue Updated', 'issue-updated', ''],
+        ['Status Changed', 'status-changed', ''],
+        ['Assigned', 'assigned', ''],
+        ['Commented', 'commented', '']
+    ]);
+
     L8Tracking.enums = {
         BUG_STATUS: BUG_STATUS.enum,
         BUG_STATUS_CLASSES: BUG_STATUS.classes,
@@ -127,7 +143,10 @@
         SPRINT_STATUS: SPRINT_STATUS.enum,
         SPRINT_STATUS_CLASSES: SPRINT_STATUS.classes,
         TRIAGE_STATUS: TRIAGE_STATUS.enum,
-        TRIAGE_STATUS_CLASSES: TRIAGE_STATUS.classes
+        TRIAGE_STATUS_CLASSES: TRIAGE_STATUS.classes,
+        DIGEST_PERIOD: DIGEST_PERIOD.enum,
+        DIGEST_PERIOD_CLASSES: DIGEST_PERIOD.classes,
+        WEBHOOK_EVENT_TYPE: WEBHOOK_EVENT_TYPE.enum
     };
 
     L8Tracking.render = {
@@ -142,6 +161,8 @@
         milestoneStatus: createStatusRenderer(MILESTONE_STATUS.enum, MILESTONE_STATUS.classes),
         sprintStatus: createStatusRenderer(SPRINT_STATUS.enum, SPRINT_STATUS.classes),
         triageStatus: createStatusRenderer(TRIAGE_STATUS.enum, TRIAGE_STATUS.classes),
+        digestPeriod: createStatusRenderer(DIGEST_PERIOD.enum, DIGEST_PERIOD.classes),
+        webhookEventType: renderEnum(WEBHOOK_EVENT_TYPE.enum),
         date: renderDate
     };
 })();

@@ -92,6 +92,15 @@ func (t *Triager) triageBug(bug *l8bugs.Bug) error {
 		bug.RelatedBugIds = result.RelatedIDs
 	}
 
+	// AI effort estimation.
+	effort, err := t.EstimateEffort(bug.Title, bug.Description, bug.Component)
+	if err != nil {
+		fmt.Printf("[triage] effort estimation failed for bug %s: %s\n", bug.BugId, err)
+	} else {
+		bug.AiEstimatedEffort = effort.EstimatedEffort
+		bug.AiEffortConfidence = effort.Confidence
+	}
+
 	if err := common.PutEntity(bugServiceName, serviceArea, bug, t.vnic); err != nil {
 		return fmt.Errorf("failed to save triage results: %w", err)
 	}
@@ -147,6 +156,14 @@ func (t *Triager) triageFeature(feature *l8bugs.Feature) error {
 
 	if len(result.RelatedIDs) > 0 {
 		feature.RelatedFeatureIds = result.RelatedIDs
+	}
+
+	// AI effort estimation.
+	effort, err := t.EstimateEffort(feature.Title, feature.Description, feature.Component)
+	if err != nil {
+		fmt.Printf("[triage] effort estimation failed for feature %s: %s\n", feature.FeatureId, err)
+	} else {
+		feature.AiEstimatedEffort = effort.EstimatedEffort
 	}
 
 	if err := common.PutEntity(featureServiceName, serviceArea, feature, t.vnic); err != nil {

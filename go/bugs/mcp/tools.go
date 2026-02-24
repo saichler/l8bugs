@@ -105,6 +105,20 @@ func (s *Server) registerTools() {
 				Required: []string{"action", "input"},
 			},
 		},
+		{
+			Name:        "generate_digest",
+			Description: "Generate an AI project digest/summary for a time period. Returns a summary, key metrics, blockers, and action items.",
+			InputSchema: InputSchema{
+				Type: "object",
+				Properties: map[string]Property{
+					"project_id": {Type: "string", Description: "Project ID to generate digest for"},
+					"period":     {Type: "string", Description: "Digest period", Enum: []string{"daily", "weekly", "custom"}},
+					"start_date": {Type: "string", Description: "Start date as Unix timestamp (for custom period)"},
+					"end_date":   {Type: "string", Description: "End date as Unix timestamp (for custom period)"},
+				},
+				Required: []string{"project_id", "period"},
+			},
+		},
 	}
 
 	s.tools["list_issues"] = s.handleListIssues
@@ -114,4 +128,5 @@ func (s *Server) registerTools() {
 	s.tools["add_comment"] = s.handleAddComment
 	s.tools["search_issues"] = s.handleSearchIssues
 	s.tools["assist_writing"] = s.handleAssistWriting
+	s.tools["generate_digest"] = s.handleGenerateDigest
 }

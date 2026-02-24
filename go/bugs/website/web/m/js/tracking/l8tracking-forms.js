@@ -74,6 +74,9 @@ limitations under the License.
             f.section('Tracking', [
                 ...f.date('dueDate', 'Due Date'),
                 ...f.number('estimatedEffort', 'Estimated Effort'),
+                ...f.number('actualEffort', 'Actual Effort'),
+                ...f.number('aiEstimatedEffort', 'AI Estimated Effort'),
+                ...f.number('aiEffortConfidence', 'AI Effort Confidence'),
                 ...f.number('voteCount', 'Votes'),
                 ...f.number('watcherCount', 'Watchers')
             ]),
@@ -134,6 +137,8 @@ limitations under the License.
                 ...f.text('targetVersion', 'Target Version'),
                 ...f.date('dueDate', 'Due Date'),
                 ...f.number('estimatedEffort', 'Estimated Effort'),
+                ...f.number('actualEffort', 'Actual Effort'),
+                ...f.number('aiEstimatedEffort', 'AI Estimated Effort'),
                 ...f.number('voteCount', 'Votes'),
                 ...f.number('watcherCount', 'Watchers')
             ]),
@@ -233,6 +238,32 @@ limitations under the License.
                     { key: 'dueDate', label: 'Due Date', type: 'date' },
                     { key: 'completionPercentage', label: 'Completion %', type: 'number' }
                 ])
+            ]),
+            f.section('Outbound Webhooks', [
+                ...f.inlineTable('outboundWebhooks', 'Webhooks', [
+                    { key: 'webhookConfigId', label: 'ID', hidden: true },
+                    { key: 'url', label: 'URL', type: 'text', required: true },
+                    { key: 'secret', label: 'Secret', type: 'text' },
+                    { key: 'description', label: 'Description', type: 'text' },
+                    { key: 'active', label: 'Active', type: 'checkbox' },
+                    { key: 'createdDate', label: 'Created', type: 'date' }
+                ])
+            ])
+        ]),
+
+        BugsDigest: f.form('Digest', [
+            f.section('Digest Details', [
+                ...f.reference('projectId', 'Project', 'BugsProject', true),
+                ...f.select('period', 'Period', enums.DIGEST_PERIOD),
+                ...f.date('startDate', 'Start Date'),
+                ...f.date('endDate', 'End Date'),
+                ...f.date('generatedDate', 'Generated Date')
+            ]),
+            f.section('Content', [
+                ...f.textarea('summary', 'Summary'),
+                ...f.textarea('keyMetrics', 'Key Metrics'),
+                ...f.textarea('blockers', 'Blockers'),
+                ...f.textarea('actionItems', 'Action Items')
             ])
         ]),
 

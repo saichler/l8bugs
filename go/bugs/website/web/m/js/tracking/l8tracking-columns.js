@@ -37,6 +37,10 @@ limitations under the License.
             ...col.enum('resolution', 'Resolution', enums.RESOLUTION_VALUES, render.resolution),
             ...col.enum('triageStatus', 'AI Triage', enums.TRIAGE_STATUS_VALUES, render.triageStatus),
             ...col.col('aiConfidence', 'AI Conf.'),
+            ...col.number('estimatedEffort', 'Est. Effort'),
+            ...col.number('actualEffort', 'Actual Effort'),
+            ...col.number('aiEstimatedEffort', 'AI Est. Effort'),
+            ...col.number('aiEffortConfidence', 'AI Effort Conf.'),
             ...col.date('createdDate', 'Created'),
             ...col.date('resolvedDate', 'Resolved')
         ],
@@ -52,6 +56,9 @@ limitations under the License.
             ...col.col('targetVersion', 'Target Version'),
             ...col.enum('triageStatus', 'AI Triage', enums.TRIAGE_STATUS_VALUES, render.triageStatus),
             ...col.col('aiConfidence', 'AI Conf.'),
+            ...col.number('estimatedEffort', 'Est. Effort'),
+            ...col.number('actualEffort', 'Actual Effort'),
+            ...col.number('aiEstimatedEffort', 'AI Est. Effort'),
             ...col.date('createdDate', 'Created')
         ],
 
@@ -74,6 +81,16 @@ limitations under the License.
             ...col.col('active', 'Active')
         ],
 
+        BugsDigest: [
+            ...col.id('digestId'),
+            ...col.col('projectId', 'Project'),
+            ...col.enum('period', 'Period', enums.DIGEST_PERIOD_VALUES, render.digestPeriod),
+            ...col.date('startDate', 'Start Date'),
+            ...col.date('endDate', 'End Date'),
+            ...col.col('summary', 'Summary'),
+            ...col.date('generatedDate', 'Generated')
+        ],
+
         BugsSprint: [
             ...col.id('sprintId'),
             ...col.col('name', 'Name'),
@@ -92,6 +109,7 @@ limitations under the License.
         Feature: 'featureId',
         BugsProject: 'projectId',
         BugsAssignee: 'assigneeId',
+        BugsDigest: 'digestId',
         BugsSprint: 'sprintId'
     };
 })();

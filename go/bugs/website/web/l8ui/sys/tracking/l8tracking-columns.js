@@ -18,6 +18,10 @@
             ...col.enum('resolution', 'Resolution', null, render.resolution),
             ...col.enum('triageStatus', 'AI Triage', null, render.triageStatus),
             ...col.col('aiConfidence', 'AI Conf.'),
+            ...col.number('estimatedEffort', 'Est. Effort'),
+            ...col.number('actualEffort', 'Actual Effort'),
+            ...col.number('aiEstimatedEffort', 'AI Est. Effort'),
+            ...col.number('aiEffortConfidence', 'AI Effort Conf.'),
             ...col.date('createdDate', 'Created'),
             ...col.date('resolvedDate', 'Resolved')
         ],
@@ -33,6 +37,9 @@
             ...col.col('targetVersion', 'Target Version'),
             ...col.enum('triageStatus', 'AI Triage', null, render.triageStatus),
             ...col.col('aiConfidence', 'AI Conf.'),
+            ...col.number('estimatedEffort', 'Est. Effort'),
+            ...col.number('actualEffort', 'Actual Effort'),
+            ...col.number('aiEstimatedEffort', 'AI Est. Effort'),
             ...col.date('createdDate', 'Created')
         ],
 
@@ -53,6 +60,16 @@
             ...col.enum('assigneeType', 'Type', null, render.assigneeType),
             ...col.col('projectId', 'Project'),
             ...col.col('active', 'Active')
+        ],
+
+        BugsDigest: [
+            ...col.id('digestId'),
+            ...col.col('projectId', 'Project'),
+            ...col.enum('period', 'Period', null, render.digestPeriod),
+            ...col.date('startDate', 'Start Date'),
+            ...col.date('endDate', 'End Date'),
+            ...col.col('summary', 'Summary'),
+            ...col.date('generatedDate', 'Generated')
         ],
 
         BugsSprint: [

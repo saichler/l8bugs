@@ -125,6 +125,22 @@ limitations under the License.
         ['Skipped', 'skipped', 'status-inactive']
     ]);
 
+    const DIGEST_PERIOD = factory.create([
+        ['Unspecified', null, ''],
+        ['Daily', 'daily', 'status-active'],
+        ['Weekly', 'weekly', 'status-active'],
+        ['Custom', 'custom', 'status-pending']
+    ]);
+
+    const WEBHOOK_EVENT_TYPE = factory.create([
+        ['Unspecified', null, ''],
+        ['Issue Created', 'issue-created', ''],
+        ['Issue Updated', 'issue-updated', ''],
+        ['Status Changed', 'status-changed', ''],
+        ['Assigned', 'assigned', ''],
+        ['Commented', 'commented', '']
+    ]);
+
     MobileL8Tracking.enums = {
         BUG_STATUS: BUG_STATUS.enum,
         BUG_STATUS_VALUES: BUG_STATUS.values,
@@ -155,7 +171,11 @@ limitations under the License.
         SPRINT_STATUS_CLASSES: SPRINT_STATUS.classes,
         TRIAGE_STATUS: TRIAGE_STATUS.enum,
         TRIAGE_STATUS_VALUES: TRIAGE_STATUS.values,
-        TRIAGE_STATUS_CLASSES: TRIAGE_STATUS.classes
+        TRIAGE_STATUS_CLASSES: TRIAGE_STATUS.classes,
+        DIGEST_PERIOD: DIGEST_PERIOD.enum,
+        DIGEST_PERIOD_VALUES: DIGEST_PERIOD.values,
+        DIGEST_PERIOD_CLASSES: DIGEST_PERIOD.classes,
+        WEBHOOK_EVENT_TYPE: WEBHOOK_EVENT_TYPE.enum
     };
 
     MobileL8Tracking.render = {
@@ -170,6 +190,8 @@ limitations under the License.
         milestoneStatus: createStatusRenderer(MILESTONE_STATUS.enum, MILESTONE_STATUS.classes),
         sprintStatus: createStatusRenderer(SPRINT_STATUS.enum, SPRINT_STATUS.classes),
         triageStatus: createStatusRenderer(TRIAGE_STATUS.enum, TRIAGE_STATUS.classes),
+        digestPeriod: createStatusRenderer(DIGEST_PERIOD.enum, DIGEST_PERIOD.classes),
+        webhookEventType: renderEnum(WEBHOOK_EVENT_TYPE.enum),
         date: renderDate
     };
 })();

@@ -113,6 +113,8 @@ limitations under the License.
                       progressField: 'completedPoints'
                   }
                 },
+                { key: 'digests', label: 'Digests', icon: '\uD83D\uDCDD',
+                  endpoint: '/20/Digest', model: 'BugsDigest' },
                 { key: 'triage', label: 'Triage Inbox', icon: '\uD83E\uDD16',
                   endpoint: '/20/Bug', model: 'Bug',
                   supportedViews: ['table'],

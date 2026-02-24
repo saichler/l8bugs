@@ -119,6 +119,22 @@ enum MilestoneStatus {
     MILESTONE_STATUS_CLOSED = 2;
 }
 
+enum WebhookEventType {
+    WEBHOOK_EVENT_TYPE_UNSPECIFIED = 0;
+    WEBHOOK_EVENT_TYPE_ISSUE_CREATED = 1;
+    WEBHOOK_EVENT_TYPE_ISSUE_UPDATED = 2;
+    WEBHOOK_EVENT_TYPE_STATUS_CHANGED = 3;
+    WEBHOOK_EVENT_TYPE_ASSIGNED = 4;
+    WEBHOOK_EVENT_TYPE_COMMENTED = 5;
+}
+
+enum DigestPeriod {
+    DIGEST_PERIOD_UNSPECIFIED = 0;
+    DIGEST_PERIOD_DAILY = 1;
+    DIGEST_PERIOD_WEEKLY = 2;
+    DIGEST_PERIOD_CUSTOM = 3;
+}
+
 enum TriageStatus {
     TRIAGE_STATUS_UNSPECIFIED = 0;
     TRIAGE_STATUS_PENDING = 1;
@@ -131,6 +147,16 @@ enum TriageStatus {
 // ============================================================================
 // Embedded Child Messages (no List types, no services)
 // ============================================================================
+
+message WebhookConfig {
+    string webhook_config_id = 1;
+    string url = 2;
+    string secret = 3;
+    repeated WebhookEventType events = 4;
+    bool active = 5;
+    string description = 6;
+    int64 created_date = 7;
+}
 
 message Comment {
     string comment_id = 1;
@@ -218,6 +244,7 @@ message BugsProject {
     repeated Label labels = 20;
     repeated Component components = 21;
     repeated Milestone milestones = 22;
+    repeated WebhookConfig outbound_webhooks = 23;
     erp.AuditInfo audit_info = 30;
 }
 
@@ -296,6 +323,9 @@ message Bug {
     repeated Vote votes = 44;
     repeated string related_bug_ids = 45;
     string linked_commit_sha = 46;
+    int32 actual_effort = 47;
+    int32 ai_estimated_effort = 48;
+    int32 ai_effort_confidence = 49;
     erp.AuditInfo audit_info = 50;
 }
 
@@ -347,6 +377,8 @@ message Feature {
     repeated string related_feature_ids = 45;
     repeated string related_bug_ids = 46;
     string linked_commit_sha = 47;
+    int32 actual_effort = 48;
+    int32 ai_estimated_effort = 49;
     erp.AuditInfo audit_info = 50;
 }
 
@@ -374,5 +406,28 @@ message BugsSprint {
 
 message BugsSprintList {
     repeated BugsSprint list = 1;
+    l8api.L8MetaData metadata = 2;
+}
+
+// ============================================================================
+// Prime Object: Digest (AI-generated project summaries)
+// ============================================================================
+
+message BugsDigest {
+    string digest_id = 1;
+    string project_id = 2;
+    DigestPeriod period = 3;
+    int64 start_date = 4;
+    int64 end_date = 5;
+    string summary = 6;
+    string key_metrics = 7;
+    string blockers = 8;
+    string action_items = 9;
+    int64 generated_date = 10;
+    erp.AuditInfo audit_info = 30;
+}
+
+message BugsDigestList {
+    repeated BugsDigest list = 1;
     l8api.L8MetaData metadata = 2;
 }

@@ -1026,12 +1026,23 @@ Layer8DReferenceRegistry.register({
 - **MCP assist_writing tool** (7th tool) exposes AI writing to coding agents
 - Desktop/mobile parity for all dashboard features
 
-### Phase 6: Advanced Features
+### Phase 6: Digests, Webhooks & Effort Tracking ✓
+- **BugsDigest Prime Object**: New service (ServiceName="Digest", ServiceArea=20) for AI-generated project summaries with period, date range, summary, key metrics, blockers, and action items
+- **Outbound webhook configuration**: WebhookConfig embedded child added to BugsProject (url, secret, events, active flag) with inline table in project form
+- **AI effort estimation**: New `triage/effort.go` estimates story points (1-13 Fibonacci) with confidence percentage; integrated into triage flow for both Bug and Feature
+- **AI digest generation**: New `triage/digest.go` generates project summaries from bug/feature data using LLM; auto-saves as BugsDigest records
+- **MCP generate_digest tool** (8th tool): Allows AI coding agents to generate daily/weekly/custom digests for any project
+- **New proto additions**: DigestPeriod enum, WebhookEventType enum, WebhookConfig message, BugsDigest/BugsDigestList messages, actual_effort/ai_estimated_effort/ai_effort_confidence fields on Bug, actual_effort/ai_estimated_effort on Feature
+- **Desktop UI**: Digest service in tracking config, DIGEST_PERIOD/WEBHOOK_EVENT_TYPE enums, BugsDigest columns/form, effort columns/fields on Bug/Feature, webhook inline table on BugsProject
+- **Mobile UI**: Full parity — same enums, columns, forms, reference config additions
+- **MCP handlers refactored**: Extracted enum parsers and digest handler into `parsers.go` to keep handlers.go under 500 lines
+
+### Phase 7: Advanced Features (Future)
 - Natural language search and Q&A
-- Webhook system (inbound/outbound)
+- Inbound webhook system (GitHub/GitLab PR events, CI/CD results)
 - Import from Jira/GitHub/Linear
-- AI effort estimation with learning feedback loop
-- AI-generated daily/weekly digests
+- AI effort estimation learning feedback loop (compare actual vs estimated)
+- Sprint completion prediction and anomaly detection
 
 ---
 

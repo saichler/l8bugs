@@ -32,6 +32,10 @@ limitations under the License.
         Feature: {
             idColumn: 'featureId', displayColumn: 'title', endpoint: '/20/Feature',
             displayField: 'title', idField: 'featureId', searchFields: ['title', 'featureNumber']
+        },
+        BugsDigest: {
+            idColumn: 'digestId', displayColumn: 'summary', endpoint: '/20/Digest',
+            displayField: 'summary', idField: 'digestId', searchFields: ['summary']
         }
     });
 
