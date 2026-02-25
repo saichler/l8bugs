@@ -91,6 +91,13 @@ limitations under the License.
     }
 
     /**
+     * Create an enum renderer for a specific enum (plain text, no badge styling)
+     */
+    function createEnumRenderer(enumMap, defaultLabel = '-') {
+        return (value) => renderEnum(value, enumMap, defaultLabel);
+    }
+
+    /**
      * Render a boolean value
      */
     function renderBoolean(value, options = {}) {
@@ -212,6 +219,7 @@ limitations under the License.
     window.Layer8DRenderers = {
         // Generic
         renderEnum,
+        createEnumRenderer,
         renderStatus,
         createStatusRenderer,
         renderBoolean,

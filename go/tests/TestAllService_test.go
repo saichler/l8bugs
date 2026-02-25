@@ -26,28 +26,15 @@ func dropAllTables(t *testing.T, vnic ifs.IVNic) {
 		t.Fatalf("Failed to get credentials: %v", err)
 	}
 	db := common.OpenDBConection(dbname, user, pass)
-	rows, err := db.Query("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")
+	_, err = db.Exec("DROP SCHEMA public CASCADE")
 	if err != nil {
-		t.Fatalf("Failed to query tables: %v", err)
+		t.Fatalf("Failed to drop schema: %v", err)
 	}
-	defer rows.Close()
-
-	var tables []string
-	for rows.Next() {
-		var name string
-		if err := rows.Scan(&name); err != nil {
-			t.Fatalf("Failed to scan table name: %v", err)
-		}
-		tables = append(tables, name)
+	_, err = db.Exec("CREATE SCHEMA public")
+	if err != nil {
+		t.Fatalf("Failed to recreate schema: %v", err)
 	}
-
-	for _, table := range tables {
-		_, err := db.Exec(fmt.Sprintf("DROP TABLE IF EXISTS \"%s\" CASCADE", table))
-		if err != nil {
-			t.Fatalf("Failed to drop table %s: %v", table, err)
-		}
-	}
-	fmt.Printf("Dropped %d tables\n", len(tables))
+	fmt.Println("Cleaned database (dropped and recreated public schema)")
 }
 
 func TestAllServices(t *testing.T) {

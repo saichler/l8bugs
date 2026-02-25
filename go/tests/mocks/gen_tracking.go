@@ -73,21 +73,50 @@ func generateBugs(store *MockDataStore) []*l8bugs.Bug {
 			severity = l8bugs.Severity_SEVERITY_TRIVIAL
 		}
 
+		// Resolution and resolvedDate for resolved/closed bugs.
+		var resolution l8bugs.Resolution
+		var resolvedDate int64
+		if status == l8bugs.BugStatus_BUG_STATUS_RESOLVED || status == l8bugs.BugStatus_BUG_STATUS_CLOSED {
+			resolution = l8bugs.Resolution_RESOLUTION_FIXED
+			resolvedDate = now - int64((count-i)*1200)
+		}
+
+		// AI triage fields — simulate completed triage for most bugs.
+		triageStatus := l8bugs.TriageStatus_TRIAGE_STATUS_COMPLETED
+		aiConfidence := int32(60 + (i%4)*10)           // 60–90
+		aiEstimatedEffort := int32((i%6 + 1) * 3)      // 3–18
+		aiEffortConfidence := int32(50 + (i%5)*10)      // 50–90
+		actualEffort := int32((i%5 + 1) * 2)            // 2–10
+		if i < 4 {
+			triageStatus = l8bugs.TriageStatus_TRIAGE_STATUS_PENDING
+			aiConfidence = 0
+			aiEstimatedEffort = 0
+			aiEffortConfidence = 0
+			actualEffort = 0
+		}
+
 		bugs[i] = &l8bugs.Bug{
-			BugId:           fmt.Sprintf("bug-%03d", i+1),
-			ProjectId:       store.ProjectIDs[i%len(store.ProjectIDs)],
-			BugNumber:       fmt.Sprintf("BUG-%d", 100+i),
-			Title:           bugTitles[i],
-			Description:     bugDescriptions[i%len(bugDescriptions)],
-			Status:          status,
-			Priority:        priority,
-			Severity:        severity,
-			AssigneeId:      store.AssigneeIDs[i%len(store.AssigneeIDs)],
-			AssigneeType:    l8bugs.AssigneeType_ASSIGNEE_TYPE_HUMAN,
-			Component:       componentNames[i%len(componentNames)],
-			Environment:     "Production",
-			EstimatedEffort: int32((i%5 + 1) * 2),
-			CreatedDate:     now - int64((count-i)*3600),
+			BugId:              fmt.Sprintf("bug-%03d", i+1),
+			ProjectId:          store.ProjectIDs[i%len(store.ProjectIDs)],
+			BugNumber:          fmt.Sprintf("BUG-%d", 100+i),
+			Title:              bugTitles[i],
+			Description:        bugDescriptions[i%len(bugDescriptions)],
+			Status:             status,
+			Priority:           priority,
+			Severity:           severity,
+			AssigneeId:         store.AssigneeIDs[i%len(store.AssigneeIDs)],
+			AssigneeType:       l8bugs.AssigneeType_ASSIGNEE_TYPE_HUMAN,
+			Component:          componentNames[i%len(componentNames)],
+			Environment:        "Production",
+			EstimatedEffort:    int32((i%5 + 1) * 2),
+			ActualEffort:       actualEffort,
+			Resolution:         resolution,
+			ResolvedDate:       resolvedDate,
+			TriageStatus:       triageStatus,
+			AiConfidence:       aiConfidence,
+			AiEstimatedEffort:  aiEstimatedEffort,
+			AiEffortConfidence: aiEffortConfidence,
+			CreatedDate:        now - int64((count-i)*3600),
 			Comments: []*l8bugs.Comment{
 				{
 					CommentId:   fmt.Sprintf("cmt-%03d-1", i+1),
@@ -133,20 +162,36 @@ func generateFeatures(store *MockDataStore) []*l8bugs.Feature {
 			priority = l8bugs.Priority_PRIORITY_LOW
 		}
 
+		// AI triage fields for features.
+		fTriageStatus := l8bugs.TriageStatus_TRIAGE_STATUS_COMPLETED
+		fAiConfidence := int32(65 + (i%3)*10) // 65–85
+		fAiEstimatedEffort := int32((i%5 + 2) * 3)
+		fActualEffort := int32((i%4 + 1) * 3)
+		if i < 2 {
+			fTriageStatus = l8bugs.TriageStatus_TRIAGE_STATUS_PENDING
+			fAiConfidence = 0
+			fAiEstimatedEffort = 0
+			fActualEffort = 0
+		}
+
 		features[i] = &l8bugs.Feature{
-			FeatureId:       fmt.Sprintf("feat-%03d", i+1),
-			ProjectId:       store.ProjectIDs[i%len(store.ProjectIDs)],
-			FeatureNumber:   fmt.Sprintf("FEAT-%d", 200+i),
-			Title:           featureTitles[i],
-			Description:     featureDescriptions[i%len(featureDescriptions)],
-			Status:          status,
-			Priority:        priority,
-			AssigneeId:      store.AssigneeIDs[i%len(store.AssigneeIDs)],
-			AssigneeType:    l8bugs.AssigneeType_ASSIGNEE_TYPE_HUMAN,
-			Component:       componentNames[i%len(componentNames)],
-			TargetVersion:   fmt.Sprintf("v1.%d.0", i/3+1),
-			EstimatedEffort: int32((i%4 + 1) * 3),
-			CreatedDate:     now - int64((count-i)*7200),
+			FeatureId:         fmt.Sprintf("feat-%03d", i+1),
+			ProjectId:         store.ProjectIDs[i%len(store.ProjectIDs)],
+			FeatureNumber:     fmt.Sprintf("FEAT-%d", 200+i),
+			Title:             featureTitles[i],
+			Description:       featureDescriptions[i%len(featureDescriptions)],
+			Status:            status,
+			Priority:          priority,
+			AssigneeId:        store.AssigneeIDs[i%len(store.AssigneeIDs)],
+			AssigneeType:      l8bugs.AssigneeType_ASSIGNEE_TYPE_HUMAN,
+			Component:         componentNames[i%len(componentNames)],
+			TargetVersion:     fmt.Sprintf("v1.%d.0", i/3+1),
+			EstimatedEffort:   int32((i%4 + 1) * 3),
+			ActualEffort:      fActualEffort,
+			TriageStatus:      fTriageStatus,
+			AiConfidence:      fAiConfidence,
+			AiEstimatedEffort: fAiEstimatedEffort,
+			CreatedDate:       now - int64((count-i)*7200),
 		}
 	}
 	return features

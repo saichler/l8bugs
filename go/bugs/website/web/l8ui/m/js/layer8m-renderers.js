@@ -33,6 +33,19 @@ limitations under the License.
         },
 
         /**
+         * Create an enum renderer for a specific enum (plain text, no badge styling)
+         * @param {Object} enumMap - Map of value to label
+         * @param {string} defaultLabel - Default label for unknown values
+         * @returns {Function} Renderer function
+         */
+        createEnumRenderer(enumMap, defaultLabel = '-') {
+            return function(value) {
+                if (value === null || value === undefined) return defaultLabel;
+                return enumMap[value] || defaultLabel;
+            };
+        },
+
+        /**
          * Create a status renderer with CSS class mapping
          * @param {Object} enumMap - Map of value to label
          * @param {Object} classMap - Map of value to CSS class

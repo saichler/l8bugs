@@ -23,6 +23,7 @@ limitations under the License.
  *           ...cols.basic(['code', 'name', 'description']),
  *           ...cols.boolean('isActive', 'Active'),
  *           ...cols.status('status', 'Status', enums.STATUS_VALUES, render.status),
+ *           ...cols.number('quantity', 'Quantity'),
  *           ...cols.date('hireDate', 'Hire Date'),
  *           ...cols.money('totalAmount', 'Total'),
  *       ]
@@ -184,6 +185,22 @@ limitations under the License.
                 sortKey: key,
                 type: 'period',
                 render: (item) => renderPeriod(item[key])
+            }];
+        },
+
+        /**
+         * Create a numeric column with sortKey and filterKey.
+         * @param {string} key - The field key
+         * @param {string} [label] - Optional label (defaults to key with title case)
+         * @returns {Array} - Single column in array format for spreading
+         */
+        number: function(key, label) {
+            return [{
+                key: key,
+                label: label || this._toTitleCase(key),
+                sortKey: key,
+                filterKey: key,
+                type: 'number'
             }];
         },
 

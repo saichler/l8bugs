@@ -20,7 +20,7 @@ limitations under the License.
     'use strict';
 
     const factory = window.Layer8EnumFactory;
-    const { createStatusRenderer, renderEnum, renderDate } = Layer8MRenderers;
+    const { createStatusRenderer, createEnumRenderer, renderDate } = Layer8MRenderers;
 
     window.MobileL8Tracking = window.MobileL8Tracking || {};
 
@@ -184,14 +184,14 @@ limitations under the License.
         priority: createStatusRenderer(PRIORITY.enum, PRIORITY.classes),
         severity: createStatusRenderer(SEVERITY.enum, SEVERITY.classes),
         resolution: createStatusRenderer(RESOLUTION.enum, RESOLUTION.classes),
-        assigneeType: renderEnum(ASSIGNEE_TYPE.enum),
+        assigneeType: createEnumRenderer(ASSIGNEE_TYPE.enum),
         projectStatus: createStatusRenderer(PROJECT_STATUS.enum, PROJECT_STATUS.classes),
-        projectVisibility: renderEnum(PROJECT_VISIBILITY.enum),
+        projectVisibility: createEnumRenderer(PROJECT_VISIBILITY.enum),
         milestoneStatus: createStatusRenderer(MILESTONE_STATUS.enum, MILESTONE_STATUS.classes),
         sprintStatus: createStatusRenderer(SPRINT_STATUS.enum, SPRINT_STATUS.classes),
         triageStatus: createStatusRenderer(TRIAGE_STATUS.enum, TRIAGE_STATUS.classes),
         digestPeriod: createStatusRenderer(DIGEST_PERIOD.enum, DIGEST_PERIOD.classes),
-        webhookEventType: renderEnum(WEBHOOK_EVENT_TYPE.enum),
+        webhookEventType: createEnumRenderer(WEBHOOK_EVENT_TYPE.enum),
         date: renderDate
     };
 })();

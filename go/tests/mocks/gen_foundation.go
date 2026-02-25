@@ -42,6 +42,7 @@ func generateProjects() []*l8bugs.BugsProject {
 			Name:          projectNames[i],
 			Key:           projectKeys[i],
 			Description:   projectDescriptions[i%len(projectDescriptions)],
+			OwnerId:       fmt.Sprintf("asgn-%03d", i+1),
 			Status:        status,
 			Visibility:    visibility,
 			RepositoryUrl: fmt.Sprintf("https://github.com/example/%s", projectKeys[i]),
