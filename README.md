@@ -109,7 +109,9 @@ Webhook secrets are configured per project in the `WebhookConfig` embedded field
 
 ## UI
 
-L8Bugs provides both desktop and mobile web interfaces built with the L8UI component library.
+L8Bugs provides both desktop and mobile web interfaces built with the L8UI component library. The tracking UI is implemented as a generic L8UI system component under `l8ui/sys/tracking/`, using the `L8Tracking` namespace (desktop) and `MobileL8Tracking` namespace (mobile).
+
+The UI lives under a single "System" sidebar section with Tracking as the default tab.
 
 ### Desktop (`go/bugs/website/web/`)
 
@@ -123,39 +125,55 @@ Full-featured interface with:
 ### Mobile (`go/bugs/website/web/m/`)
 
 Touch-optimized interface with:
-- Card-based layouts
-- Responsive navigation
+- Card-based layouts with module/service navigation
+- Responsive navigation with back buttons and breadcrumbs
+- Full CRUD support with mobile-optimized forms
 - PWA support
 
-Both platforms share the same enum definitions, column definitions, and form definitions through the L8Tracking namespace.
+### Shared Tracking Components
+
+Both platforms share enum definitions, column definitions, form definitions, and reference registries:
+
+| File | Desktop Location | Mobile Location |
+|------|-----------------|-----------------|
+| Enums | `l8ui/sys/tracking/l8tracking-enums.js` | `m/js/tracking/l8tracking-enums.js` |
+| Columns | `l8ui/sys/tracking/l8tracking-columns.js` | `m/js/tracking/l8tracking-columns.js` |
+| Forms | `l8ui/sys/tracking/l8tracking-forms.js` | `m/js/tracking/l8tracking-forms.js` |
+| References | `l8ui/sys/tracking/l8tracking-reference.js` | `m/js/tracking/layer8m-reference-registry-tracking.js` |
+| Init | `l8ui/sys/tracking/l8tracking.js` | — |
 
 ## Project Structure
 
 ```
 l8bugs/
-├── proto/                    # Protobuf definitions
-│   └── bugs.proto            # All message types and enums
-├── plans/                    # PRD and phase plans
+├── proto/                       # Protobuf definitions
+│   ├── bugs.proto               # All message types and enums
+│   └── make-bindings.sh         # Proto compiler script
+├── plans/                       # PRD and phase plans
 ├── go/
-│   ├── bugs/                 # Backend implementation
-│   │   ├── common/           # Shared utilities, DB connection, service factory
-│   │   ├── services/         # Service activation orchestrator
-│   │   ├── bugs/             # Bug service + callbacks
-│   │   ├── features/         # Feature service + callbacks
-│   │   ├── projects/         # Project service + callbacks
-│   │   ├── assignees/        # Assignee service + callbacks
-│   │   ├── sprints/          # Sprint service + callbacks
-│   │   ├── digests/          # Digest service + callbacks
-│   │   ├── triage/           # AI triage engine (Anthropic API)
-│   │   ├── webhook/          # GitHub/GitLab webhook handlers
-│   │   ├── mcp/              # MCP server (tools, handlers, protocol)
-│   │   ├── website/          # Web server setup + UI assets
-│   │   └── main/             # Backend entry point
-│   ├── types/l8bugs/         # Generated protobuf Go types
-│   ├── tests/                # Integration test suite
-│   │   └── mocks/            # Mock data generators
-│   ├── demo/                 # Auto-generated demo binaries and assets
-│   └── vendor/               # Vendored dependencies
+│   ├── bugs/                    # Backend implementation
+│   │   ├── common/              # Shared utilities, DB connection, service factory
+│   │   ├── services/            # Service activation orchestrator
+│   │   ├── bugs/                # Bug service + callbacks
+│   │   ├── features/            # Feature service + callbacks
+│   │   ├── projects/            # Project service + callbacks
+│   │   ├── assignees/           # Assignee service + callbacks
+│   │   ├── sprints/             # Sprint service + callbacks
+│   │   ├── digests/             # Digest service + callbacks
+│   │   ├── triage/              # AI triage engine (Anthropic API)
+│   │   ├── webhook/             # GitHub/GitLab webhook handlers
+│   │   ├── mcp/                 # MCP server (tools, handlers, protocol)
+│   │   │   └── main1/           # MCP server entry point
+│   │   ├── website/             # Web server + UI assets
+│   │   │   └── web/             # Desktop & mobile web assets
+│   │   ├── vnet/                # Virtual network entry point
+│   │   └── main/                # Backend entry point
+│   ├── types/l8bugs/            # Generated protobuf Go types
+│   ├── tests/                   # Integration test suite (12 test files)
+│   │   └── mocks/               # Mock data generators
+│   └── vendor/                  # Vendored dependencies
+├── run-local.sh                 # Local development startup
+├── test.sh                      # Test runner with coverage
 └── README.md
 ```
 
@@ -163,8 +181,8 @@ l8bugs/
 
 ### Prerequisites
 
-- Go 1.21+
-- PostgreSQL (auto-started via `/start-postgres.sh`)
+- Go 1.25+
+- PostgreSQL (auto-started via Docker)
 - Layer 8 framework dependencies (vendored)
 
 ### Build & Run
@@ -184,6 +202,7 @@ This builds three binaries in `demo/`:
 | Constant | Value | Description |
 |----------|-------|-------------|
 | `BUGS_VNET` | 35010 | Service network port |
+| `BUGS_LOGS_VNET` | 35015 | Log aggregation network port |
 | `PREFIX` | `/bugs/` | REST endpoint prefix |
 | `ServiceArea` | 20 | Shared across all tracking services |
 | Web port | 2883 | HTTPS web server |
@@ -195,7 +214,7 @@ cd go
 go test -v ./tests/ -count=1 -timeout 300s
 ```
 
-The test suite runs a full integration test:
+The test suite (~4,000 lines across 12 test files) runs full integration tests:
 
 1. Drops and recreates the database schema
 2. Activates all 6 services
@@ -205,8 +224,27 @@ The test suite runs a full integration test:
 6. Tests CRUD lifecycle for all entities
 7. Tests validation (required fields, auto-generated IDs)
 8. Tests business logic (status transitions, terminal states, date validation)
-9. Tests GitHub and GitLab webhook processing
-10. Tests MCP server tools
+9. Tests bug and feature status transition workflows
+10. Tests sprint lifecycle logic
+11. Tests GitHub and GitLab webhook processing
+12. Tests MCP server tools
+
+### Test Files
+
+| File | Coverage |
+|------|----------|
+| `TestAllService_test.go` | Service activation and mock data upload |
+| `TestServiceHandlers_test.go` | Handler routing and response validation |
+| `TestServiceGetters_test.go` | Query and getter functionality |
+| `TestCRUD_test.go` | Full CRUD lifecycle for all entities |
+| `TestValidation_test.go` | Required field and input validation |
+| `TestBusinessLogic_test.go` | Cross-entity business rules |
+| `TestBugTransitions_test.go` | Bug status workflow transitions |
+| `TestFeatureTransitions_test.go` | Feature status workflow transitions |
+| `TestSprintLogic_test.go` | Sprint lifecycle and capacity logic |
+| `TestWebhook_test.go` | GitHub webhook event processing |
+| `TestWebhookGitLab_test.go` | GitLab webhook event processing |
+| `TestMCP_test.go` | MCP server tool execution |
 
 ### Coverage
 
@@ -229,16 +267,39 @@ cd go
 | Resolution | Fixed, Won't Fix, Duplicate, Cannot Reproduce, By Design, Obsolete |
 | SprintStatus | Planning, Active, Completed |
 | TriageStatus | Pending, In Progress, Completed, Failed, Skipped |
+| AssigneeType | Human, AI Agent, Team |
+| AuthorType | Human, AI, System |
+| ProjectStatus | Active, Archived, On Hold |
+| ProjectVisibility | Public, Private, Internal |
+| MilestoneStatus | Open, Closed |
+| DigestPeriod | Daily, Weekly |
 
 ### Embedded Child Types (not standalone services)
 
 - **Comment** — Issue comments with author type (human/AI/system)
 - **Attachment** — File metadata with URLs
 - **ActivityEntry** — Change history tracking
+- **Watcher** — Issue subscribers
+- **Vote** — Issue voting
 - **Label** — Project-scoped issue labels
 - **Component** — Software components with default assignees
 - **Milestone** — Release milestones with due dates
 - **WebhookConfig** — Webhook endpoint and secret per project
+
+## Layer 8 Framework Dependencies
+
+| Package | Purpose |
+|---------|---------|
+| `l8bus` | Message bus and overlay networking |
+| `l8orm` | Object-relational mapping and persistence |
+| `l8services` | Service lifecycle management |
+| `l8types` | Type system and registry |
+| `l8web` | HTTPS web server and REST routing |
+| `l8reflect` | Introspection and primary key decorators |
+| `l8utils` | Shared utilities and caching |
+| `l8srlz` | Serialization |
+| `l8test` | Test topology infrastructure |
+| `l8ql` | Query language (L8Query) |
 
 ## License
 
