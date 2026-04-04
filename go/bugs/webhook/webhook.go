@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/saichler/l8bugs/go/bugs/common"
+	l8common "github.com/saichler/l8common/go/common"
 	l8bugs "github.com/saichler/l8bugs/go/types/l8bugs"
 	"github.com/saichler/l8types/go/ifs"
 	"github.com/saichler/l8web/go/web/server"
@@ -162,11 +162,12 @@ func (h *webhookHandler) handleGitLabMR(body []byte) {
 
 func (h *webhookHandler) linkCommitToIssue(ref, commitSHA, prURL string, autoTransition bool) {
 	// Try as bug ID or bug number.
-	bug, _ := common.GetEntity(bugService, serviceArea, &l8bugs.Bug{BugId: ref}, h.vnic)
-	if bug == nil {
-		bug, _ = common.GetEntity(bugService, serviceArea, &l8bugs.Bug{BugNumber: ref}, h.vnic)
+	result, _ := l8common.GetEntity(bugService, serviceArea, &l8bugs.Bug{BugId: ref}, h.vnic)
+	if result == nil {
+		result, _ = l8common.GetEntity(bugService, serviceArea, &l8bugs.Bug{BugNumber: ref}, h.vnic)
 	}
-	if bug != nil {
+	if result != nil {
+		bug := result.(*l8bugs.Bug)
 		bug.LinkedCommitSha = commitSHA
 		if prURL != "" {
 			bug.LinkedPrUrl = prURL
@@ -174,7 +175,7 @@ func (h *webhookHandler) linkCommitToIssue(ref, commitSHA, prURL string, autoTra
 		if autoTransition && bug.Status == l8bugs.BugStatus_BUG_STATUS_IN_REVIEW {
 			bug.Status = l8bugs.BugStatus_BUG_STATUS_RESOLVED
 		}
-		if err := common.PutEntity(bugService, serviceArea, bug, h.vnic); err != nil {
+		if err := l8common.PutEntity(bugService, serviceArea, bug, h.vnic); err != nil {
 			fmt.Printf("[webhook] failed to update bug %s: %s\n", ref, err)
 		} else {
 			fmt.Printf("[webhook] linked commit %s to bug %s\n", commitSHA[:8], ref)
@@ -183,11 +184,12 @@ func (h *webhookHandler) linkCommitToIssue(ref, commitSHA, prURL string, autoTra
 	}
 
 	// Try as feature ID or feature number.
-	feature, _ := common.GetEntity(featureService, serviceArea, &l8bugs.Feature{FeatureId: ref}, h.vnic)
-	if feature == nil {
-		feature, _ = common.GetEntity(featureService, serviceArea, &l8bugs.Feature{FeatureNumber: ref}, h.vnic)
+	result, _ = l8common.GetEntity(featureService, serviceArea, &l8bugs.Feature{FeatureId: ref}, h.vnic)
+	if result == nil {
+		result, _ = l8common.GetEntity(featureService, serviceArea, &l8bugs.Feature{FeatureNumber: ref}, h.vnic)
 	}
-	if feature != nil {
+	if result != nil {
+		feature := result.(*l8bugs.Feature)
 		feature.LinkedCommitSha = commitSHA
 		if prURL != "" {
 			feature.LinkedPrUrl = prURL
@@ -195,7 +197,7 @@ func (h *webhookHandler) linkCommitToIssue(ref, commitSHA, prURL string, autoTra
 		if autoTransition && feature.Status == l8bugs.FeatureStatus_FEATURE_STATUS_IN_REVIEW {
 			feature.Status = l8bugs.FeatureStatus_FEATURE_STATUS_DONE
 		}
-		if err := common.PutEntity(featureService, serviceArea, feature, h.vnic); err != nil {
+		if err := l8common.PutEntity(featureService, serviceArea, feature, h.vnic); err != nil {
 			fmt.Printf("[webhook] failed to update feature %s: %s\n", ref, err)
 		} else {
 			fmt.Printf("[webhook] linked commit %s to feature %s\n", commitSHA[:8], ref)
@@ -211,9 +213,9 @@ func (h *webhookHandler) findProject(repoURL string) *l8bugs.BugsProject {
 		return nil
 	}
 	query := fmt.Sprintf("select * from BugsProject where repositoryUrl='%s'", repoURL)
-	projects, err := common.QueryEntities[l8bugs.BugsProject](projectService, serviceArea, query, h.vnic)
+	projects, err := l8common.GetEntitiesByQuery(projectService, serviceArea, query, h.vnic)
 	if err != nil || len(projects) == 0 {
 		return nil
 	}
-	return projects[0]
+	return projects[0].(*l8bugs.BugsProject)
 }

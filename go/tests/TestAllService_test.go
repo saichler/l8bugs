@@ -6,6 +6,7 @@ import (
 	"github.com/saichler/l8bugs/go/bugs/common"
 	"github.com/saichler/l8bugs/go/bugs/services"
 	"github.com/saichler/l8bugs/go/tests/mocks"
+	l8common "github.com/saichler/l8common/go/common"
 	"github.com/saichler/l8types/go/ifs"
 	"net/http"
 	"testing"
@@ -25,7 +26,7 @@ func dropAllTables(t *testing.T, vnic ifs.IVNic) {
 	if err != nil {
 		t.Fatalf("Failed to get credentials: %v", err)
 	}
-	db := common.OpenDBConection(dbname, user, pass)
+	db := l8common.OpenDBConection(dbname, user, pass)
 	_, err = db.Exec("DROP SCHEMA public CASCADE")
 	if err != nil {
 		t.Fatalf("Failed to drop schema: %v", err)

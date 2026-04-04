@@ -3,7 +3,7 @@ package triage
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/saichler/l8bugs/go/bugs/common"
+	l8common "github.com/saichler/l8common/go/common"
 	l8bugs "github.com/saichler/l8bugs/go/types/l8bugs"
 	"github.com/saichler/l8types/go/ifs"
 	"regexp"
@@ -286,8 +286,15 @@ func (t *Triager) AnalyzeRootCause(bug *l8bugs.Bug) (*RootCauseResult, error) {
 }
 
 func fetchProject(vnic ifs.IVNic, projectID string) (*l8bugs.BugsProject, error) {
-	return common.GetEntity(projectServiceName, serviceArea,
+	result, err := l8common.GetEntity(projectServiceName, serviceArea,
 		&l8bugs.BugsProject{ProjectId: projectID}, vnic)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil {
+		return nil, nil
+	}
+	return result.(*l8bugs.BugsProject), nil
 }
 
 // formatRootCauseForStorage combines the analysis result into a human-readable string

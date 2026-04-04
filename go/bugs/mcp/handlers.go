@@ -2,7 +2,7 @@ package mcp
 
 import (
 	"fmt"
-	"github.com/saichler/l8bugs/go/bugs/common"
+	l8common "github.com/saichler/l8common/go/common"
 	"github.com/saichler/l8bugs/go/bugs/triage"
 	l8bugs "github.com/saichler/l8bugs/go/types/l8bugs"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -82,18 +82,19 @@ func (s *Server) listBugs(args map[string]interface{}, limit int) (*CallToolResu
 		filter.Priority = parsePriority(v)
 	}
 
-	bugs, err := common.GetEntities(bugService, serviceArea, filter, s.vnic)
+	results, err := l8common.GetEntities(bugService, serviceArea, filter, s.vnic)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list bugs: %w", err)
 	}
 
-	if len(bugs) > limit {
-		bugs = bugs[:limit]
+	if len(results) > limit {
+		results = results[:limit]
 	}
 
 	var b strings.Builder
-	fmt.Fprintf(&b, "Found %d bug(s):\n\n", len(bugs))
-	for _, bug := range bugs {
+	fmt.Fprintf(&b, "Found %d bug(s):\n\n", len(results))
+	for _, item := range results {
+		bug := item.(*l8bugs.Bug)
 		fmt.Fprintf(&b, "- **%s** [%s] %s (priority=%s, status=%s)\n",
 			bug.BugId, bug.BugNumber, bug.Title,
 			bug.Priority.String(), bug.Status.String())
@@ -116,18 +117,19 @@ func (s *Server) listFeatures(args map[string]interface{}, limit int) (*CallTool
 		filter.Priority = parsePriority(v)
 	}
 
-	features, err := common.GetEntities(featureService, serviceArea, filter, s.vnic)
+	results, err := l8common.GetEntities(featureService, serviceArea, filter, s.vnic)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list features: %w", err)
 	}
 
-	if len(features) > limit {
-		features = features[:limit]
+	if len(results) > limit {
+		results = results[:limit]
 	}
 
 	var b strings.Builder
-	fmt.Fprintf(&b, "Found %d feature(s):\n\n", len(features))
-	for _, f := range features {
+	fmt.Fprintf(&b, "Found %d feature(s):\n\n", len(results))
+	for _, item := range results {
+		f := item.(*l8bugs.Feature)
 		fmt.Fprintf(&b, "- **%s** [%s] %s (priority=%s, status=%s)\n",
 			f.FeatureId, f.FeatureNumber, f.Title,
 			f.Priority.String(), f.Status.String())
@@ -143,14 +145,14 @@ func (s *Server) handleReadIssue(args map[string]interface{}) (*CallToolResult, 
 		return nil, fmt.Errorf("issue_id is required")
 	}
 
-	bug, err := common.GetEntity(bugService, serviceArea, &l8bugs.Bug{BugId: id}, s.vnic)
-	if err == nil && bug != nil {
-		return textResult(protoToText(bug)), nil
+	result, err := l8common.GetEntity(bugService, serviceArea, &l8bugs.Bug{BugId: id}, s.vnic)
+	if err == nil && result != nil {
+		return textResult(protoToText(result.(*l8bugs.Bug))), nil
 	}
 
-	feature, err := common.GetEntity(featureService, serviceArea, &l8bugs.Feature{FeatureId: id}, s.vnic)
-	if err == nil && feature != nil {
-		return textResult(protoToText(feature)), nil
+	result, err = l8common.GetEntity(featureService, serviceArea, &l8bugs.Feature{FeatureId: id}, s.vnic)
+	if err == nil && result != nil {
+		return textResult(protoToText(result.(*l8bugs.Feature))), nil
 	}
 
 	return nil, fmt.Errorf("issue not found: %s", id)
@@ -183,11 +185,11 @@ func (s *Server) createBug(args map[string]interface{}) (*CallToolResult, error)
 		bug.Severity = parseSeverity(v)
 	}
 
-	created, err := common.PostEntity(bugService, serviceArea, bug, s.vnic)
+	result, err := l8common.PostEntity(bugService, serviceArea, bug, s.vnic)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create bug: %w", err)
 	}
-	return textResult(fmt.Sprintf("Bug created: %s", protoToText(created))), nil
+	return textResult(fmt.Sprintf("Bug created: %s", protoToText(result.(*l8bugs.Bug)))), nil
 }
 
 func (s *Server) createFeature(args map[string]interface{}) (*CallToolResult, error) {
@@ -204,11 +206,11 @@ func (s *Server) createFeature(args map[string]interface{}) (*CallToolResult, er
 		feature.Priority = parsePriority(v)
 	}
 
-	created, err := common.PostEntity(featureService, serviceArea, feature, s.vnic)
+	result, err := l8common.PostEntity(featureService, serviceArea, feature, s.vnic)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create feature: %w", err)
 	}
-	return textResult(fmt.Sprintf("Feature created: %s", protoToText(created))), nil
+	return textResult(fmt.Sprintf("Feature created: %s", protoToText(result.(*l8bugs.Feature)))), nil
 }
 
 // --- update_issue ---
@@ -219,14 +221,14 @@ func (s *Server) handleUpdateIssue(args map[string]interface{}) (*CallToolResult
 		return nil, fmt.Errorf("issue_id is required")
 	}
 
-	bug, _ := common.GetEntity(bugService, serviceArea, &l8bugs.Bug{BugId: id}, s.vnic)
-	if bug != nil {
-		return s.updateBug(bug, args)
+	result, _ := l8common.GetEntity(bugService, serviceArea, &l8bugs.Bug{BugId: id}, s.vnic)
+	if result != nil {
+		return s.updateBug(result.(*l8bugs.Bug), args)
 	}
 
-	feature, _ := common.GetEntity(featureService, serviceArea, &l8bugs.Feature{FeatureId: id}, s.vnic)
-	if feature != nil {
-		return s.updateFeature(feature, args)
+	result, _ = l8common.GetEntity(featureService, serviceArea, &l8bugs.Feature{FeatureId: id}, s.vnic)
+	if result != nil {
+		return s.updateFeature(result.(*l8bugs.Feature), args)
 	}
 
 	return nil, fmt.Errorf("issue not found: %s", id)
@@ -258,7 +260,7 @@ func (s *Server) updateBug(bug *l8bugs.Bug, args map[string]interface{}) (*CallT
 		bug.Resolution = parseResolution(v)
 	}
 
-	if err := common.PutEntity(bugService, serviceArea, bug, s.vnic); err != nil {
+	if err := l8common.PutEntity(bugService, serviceArea, bug, s.vnic); err != nil {
 		return nil, fmt.Errorf("failed to update bug: %w", err)
 	}
 	return textResult(fmt.Sprintf("Bug updated: %s", protoToText(bug))), nil
@@ -284,7 +286,7 @@ func (s *Server) updateFeature(feature *l8bugs.Feature, args map[string]interfac
 		feature.Component = v
 	}
 
-	if err := common.PutEntity(featureService, serviceArea, feature, s.vnic); err != nil {
+	if err := l8common.PutEntity(featureService, serviceArea, feature, s.vnic); err != nil {
 		return nil, fmt.Errorf("failed to update feature: %w", err)
 	}
 	return textResult(fmt.Sprintf("Feature updated: %s", protoToText(feature))), nil
@@ -310,19 +312,21 @@ func (s *Server) handleAddComment(args map[string]interface{}) (*CallToolResult,
 		CreatedDate: time.Now().Unix(),
 	}
 
-	bug, _ := common.GetEntity(bugService, serviceArea, &l8bugs.Bug{BugId: id}, s.vnic)
-	if bug != nil {
+	result, _ := l8common.GetEntity(bugService, serviceArea, &l8bugs.Bug{BugId: id}, s.vnic)
+	if result != nil {
+		bug := result.(*l8bugs.Bug)
 		bug.Comments = append(bug.Comments, comment)
-		if err := common.PutEntity(bugService, serviceArea, bug, s.vnic); err != nil {
+		if err := l8common.PutEntity(bugService, serviceArea, bug, s.vnic); err != nil {
 			return nil, fmt.Errorf("failed to add comment: %w", err)
 		}
 		return textResult("Comment added to bug " + id), nil
 	}
 
-	feature, _ := common.GetEntity(featureService, serviceArea, &l8bugs.Feature{FeatureId: id}, s.vnic)
-	if feature != nil {
+	result, _ = l8common.GetEntity(featureService, serviceArea, &l8bugs.Feature{FeatureId: id}, s.vnic)
+	if result != nil {
+		feature := result.(*l8bugs.Feature)
 		feature.Comments = append(feature.Comments, comment)
-		if err := common.PutEntity(featureService, serviceArea, feature, s.vnic); err != nil {
+		if err := l8common.PutEntity(featureService, serviceArea, feature, s.vnic); err != nil {
 			return nil, fmt.Errorf("failed to add comment: %w", err)
 		}
 		return textResult("Comment added to feature " + id), nil
@@ -350,8 +354,9 @@ func (s *Server) handleSearchIssues(args map[string]interface{}) (*CallToolResul
 		if projectID != "" {
 			filter.ProjectId = projectID
 		}
-		bugs, _ := common.GetEntities(bugService, serviceArea, filter, s.vnic)
-		for _, bug := range bugs {
+		results, _ := l8common.GetEntities(bugService, serviceArea, filter, s.vnic)
+		for _, item := range results {
+			bug := item.(*l8bugs.Bug)
 			if matchesQuery(query, bug.Title, bug.Description) {
 				fmt.Fprintf(&b, "- [Bug] **%s** %s (status=%s)\n", bug.BugId, bug.Title, bug.Status.String())
 				count++
@@ -364,8 +369,9 @@ func (s *Server) handleSearchIssues(args map[string]interface{}) (*CallToolResul
 		if projectID != "" {
 			filter.ProjectId = projectID
 		}
-		features, _ := common.GetEntities(featureService, serviceArea, filter, s.vnic)
-		for _, f := range features {
+		results, _ := l8common.GetEntities(featureService, serviceArea, filter, s.vnic)
+		for _, item := range results {
+			f := item.(*l8bugs.Feature)
 			if matchesQuery(query, f.Title, f.Description) {
 				fmt.Fprintf(&b, "- [Feature] **%s** %s (status=%s)\n", f.FeatureId, f.Title, f.Status.String())
 				count++
@@ -412,4 +418,3 @@ func (s *Server) handleAssistWriting(args map[string]interface{}) (*CallToolResu
 
 	return textResult(result.Output), nil
 }
-

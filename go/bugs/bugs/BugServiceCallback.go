@@ -1,24 +1,21 @@
 package bugs
 
 import (
-	"github.com/saichler/l8bugs/go/bugs/common"
+	l8common "github.com/saichler/l8common/go/common"
 	"github.com/saichler/l8bugs/go/bugs/triage"
 	l8bugs "github.com/saichler/l8bugs/go/types/l8bugs"
 	"github.com/saichler/l8types/go/ifs"
 )
 
-func newBugServiceCallback() ifs.IServiceCallback {
-	return common.NewValidation[l8bugs.Bug]("Bug",
-		func(e *l8bugs.Bug) { common.GenerateID(&e.BugId) }).
+func newBugServiceCallback(vnic ifs.IVNic) ifs.IServiceCallback {
+	return l8common.NewValidation(&l8bugs.Bug{}, vnic).
 		Require(func(e *l8bugs.Bug) string { return e.BugId }, "BugId").
 		Require(func(e *l8bugs.Bug) string { return e.ProjectId }, "ProjectId").
 		Require(func(e *l8bugs.Bug) string { return e.Title }, "Title").
-		StatusTransition(&common.StatusTransitionConfig[l8bugs.Bug]{
-			StatusGetter: func(e *l8bugs.Bug) int32 { return int32(e.Status) },
-			StatusSetter: func(e *l8bugs.Bug, s int32) { e.Status = l8bugs.BugStatus(s) },
-			FilterBuilder: func(e *l8bugs.Bug) *l8bugs.Bug {
-				return &l8bugs.Bug{BugId: e.BugId}
-			},
+		StatusTransition(&l8common.StatusTransitionConfig{
+			StatusGetter:  func(e interface{}) int32 { return int32(e.(*l8bugs.Bug).Status) },
+			StatusSetter:  func(e interface{}, s int32) { e.(*l8bugs.Bug).Status = l8bugs.BugStatus(s) },
+			FilterBuilder: func(e interface{}) interface{} { return &l8bugs.Bug{BugId: e.(*l8bugs.Bug).BugId} },
 			ServiceName:   ServiceName,
 			ServiceArea:   ServiceArea,
 			InitialStatus: int32(l8bugs.BugStatus_BUG_STATUS_OPEN),

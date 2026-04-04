@@ -2,7 +2,7 @@ package triage
 
 import (
 	"fmt"
-	"github.com/saichler/l8bugs/go/bugs/common"
+	l8common "github.com/saichler/l8common/go/common"
 	l8bugs "github.com/saichler/l8bugs/go/types/l8bugs"
 	"strings"
 	"time"
@@ -37,8 +37,17 @@ func (t *Triager) GenerateDigest(projectID string, period l8bugs.DigestPeriod, s
 		return nil, fmt.Errorf("AI digest unavailable: API key not configured")
 	}
 
-	bugs, _ := common.GetEntities(bugServiceName, serviceArea, &l8bugs.Bug{ProjectId: projectID}, t.vnic)
-	features, _ := common.GetEntities(featureServiceName, serviceArea, &l8bugs.Feature{ProjectId: projectID}, t.vnic)
+	bugResults, _ := l8common.GetEntities(bugServiceName, serviceArea, &l8bugs.Bug{ProjectId: projectID}, t.vnic)
+	featureResults, _ := l8common.GetEntities(featureServiceName, serviceArea, &l8bugs.Feature{ProjectId: projectID}, t.vnic)
+
+	bugs := make([]*l8bugs.Bug, len(bugResults))
+	for i, item := range bugResults {
+		bugs[i] = item.(*l8bugs.Bug)
+	}
+	features := make([]*l8bugs.Feature, len(featureResults))
+	for i, item := range featureResults {
+		features[i] = item.(*l8bugs.Feature)
+	}
 
 	// Filter to date range if specified.
 	if startDate > 0 {
@@ -66,12 +75,12 @@ func (t *Triager) GenerateDigest(projectID string, period l8bugs.DigestPeriod, s
 		GeneratedDate: time.Now().Unix(),
 	}
 
-	created, err := common.PostEntity("Digest", serviceArea, digest, t.vnic)
+	created, err := l8common.PostEntity("Digest", serviceArea, digest, t.vnic)
 	if err != nil {
 		return nil, fmt.Errorf("failed to save digest: %w", err)
 	}
 	fmt.Printf("[triage] digest generated for project %s\n", projectID)
-	return created, nil
+	return created.(*l8bugs.BugsDigest), nil
 }
 
 func buildDigestPrompt(bugs []*l8bugs.Bug, features []*l8bugs.Feature) string {

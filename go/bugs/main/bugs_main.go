@@ -20,13 +20,14 @@ import (
 	"github.com/saichler/l8bugs/go/bugs/common"
 	"github.com/saichler/l8bugs/go/bugs/services"
 	"github.com/saichler/l8bus/go/overlay/vnic"
+	l8common "github.com/saichler/l8common/go/common"
 	"github.com/saichler/l8types/go/ifs"
 	"os/exec"
 	"time"
 )
 
 func main() {
-	res := common.CreateResources("BugsServices")
+	res := l8common.CreateResources("BugsServices", "/data/logs/l8bugs", uint32(common.BUGS_VNET))
 	ifs.SetNetworkMode(ifs.NETWORK_K8s)
 	nic := vnic.NewVirtualNetworkInterface(res, nil)
 	nic.Start()
@@ -37,7 +38,7 @@ func main() {
 
 	services.ActivateBugsServices(common.DB_CREDS, common.DB_NAME, nic)
 
-	common.WaitForSignal(res)
+	l8common.WaitForSignal(res)
 }
 
 func startDb(nic ifs.IVNic) {

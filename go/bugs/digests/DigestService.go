@@ -1,7 +1,7 @@
 package digests
 
 import (
-	"github.com/saichler/l8bugs/go/bugs/common"
+	l8common "github.com/saichler/l8common/go/common"
 	l8bugs "github.com/saichler/l8bugs/go/types/l8bugs"
 	"github.com/saichler/l8types/go/ifs"
 )
@@ -12,19 +12,25 @@ const (
 )
 
 func Activate(creds, dbname string, vnic ifs.IVNic) {
-	common.ActivateService[l8bugs.BugsDigest, l8bugs.BugsDigestList](common.ServiceConfig{
-		ServiceName:   ServiceName,
-		ServiceArea:   ServiceArea,
-		PrimaryKey:    "DigestId",
-		Callback:      newDigestServiceCallback(),
-		Transactional: true,
-	}, creds, dbname, vnic)
+	l8common.ActivateService(l8common.ServiceConfig{
+		ServiceName: ServiceName,
+		ServiceArea: ServiceArea,
+		PrimaryKey:  "DigestId",
+		Callback:    newDigestServiceCallback(vnic),
+	}, &l8bugs.BugsDigest{}, &l8bugs.BugsDigestList{}, creds, dbname, vnic)
 }
 
 func Digests(vnic ifs.IVNic) (ifs.IServiceHandler, bool) {
-	return common.ServiceHandler(ServiceName, ServiceArea, vnic)
+	return l8common.ServiceHandler(ServiceName, ServiceArea, vnic)
 }
 
 func Digest(digestId string, vnic ifs.IVNic) (*l8bugs.BugsDigest, error) {
-	return common.GetEntity(ServiceName, ServiceArea, &l8bugs.BugsDigest{DigestId: digestId}, vnic)
+	result, err := l8common.GetEntity(ServiceName, ServiceArea, &l8bugs.BugsDigest{DigestId: digestId}, vnic)
+	if err != nil {
+		return nil, err
+	}
+	if result == nil {
+		return nil, nil
+	}
+	return result.(*l8bugs.BugsDigest), nil
 }

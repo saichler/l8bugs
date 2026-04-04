@@ -37,42 +37,42 @@ func RunAllPhases(client *BugsClient, store *MockDataStore) {
 // Phase 1: Foundation (Projects + Assignees — no dependencies)
 func runFoundation(client *BugsClient, store *MockDataStore) error {
 	projects := generateProjects()
-	ids := extractIDs(projects, func(p *l8bugs.BugsProject) string { return p.ProjectId })
+	ids := extractProjectIDs(projects)
 	err := runOp(client, "Projects", "/bugs/20/Project", &l8bugs.BugsProjectList{List: projects}, ids, &store.ProjectIDs)
 	if err != nil {
 		return err
 	}
 
 	assignees := generateAssignees(store)
-	aIDs := extractIDs(assignees, func(a *l8bugs.BugsAssignee) string { return a.AssigneeId })
+	aIDs := extractAssigneeIDs(assignees)
 	return runOp(client, "Assignees", "/bugs/20/Assignee", &l8bugs.BugsAssigneeList{List: assignees}, aIDs, &store.AssigneeIDs)
 }
 
 // Phase 2: Tracking (Bugs + Features — depend on Projects, Assignees)
 func runTracking(client *BugsClient, store *MockDataStore) error {
 	bugs := generateBugs(store)
-	bIDs := extractIDs(bugs, func(b *l8bugs.Bug) string { return b.BugId })
+	bIDs := extractBugIDs(bugs)
 	err := runOp(client, "Bugs", "/bugs/20/Bug", &l8bugs.BugList{List: bugs}, bIDs, &store.BugIDs)
 	if err != nil {
 		return err
 	}
 
 	features := generateFeatures(store)
-	fIDs := extractIDs(features, func(f *l8bugs.Feature) string { return f.FeatureId })
+	fIDs := extractFeatureIDs(features)
 	return runOp(client, "Features", "/bugs/20/Feature", &l8bugs.FeatureList{List: features}, fIDs, &store.FeatureIDs)
 }
 
 // Phase 3: Planning (Sprints + Digests — depend on Projects)
 func runPlanning(client *BugsClient, store *MockDataStore) error {
 	sprints := generateSprints(store)
-	sIDs := extractIDs(sprints, func(s *l8bugs.BugsSprint) string { return s.SprintId })
+	sIDs := extractSprintIDs(sprints)
 	err := runOp(client, "Sprints", "/bugs/20/Sprint", &l8bugs.BugsSprintList{List: sprints}, sIDs, &store.SprintIDs)
 	if err != nil {
 		return err
 	}
 
 	digests := generateDigests(store)
-	dIDs := extractIDs(digests, func(d *l8bugs.BugsDigest) string { return d.DigestId })
+	dIDs := extractDigestIDs(digests)
 	return runOp(client, "Digests", "/bugs/20/Digest", &l8bugs.BugsDigestList{List: digests}, dIDs, &store.DigestIDs)
 }
 
@@ -110,11 +110,56 @@ func runOp(client *BugsClient, label, endpoint string, list interface{}, ids []s
 	return nil
 }
 
-// extractIDs extracts a string field from a slice using a getter
-func extractIDs[T any](items []*T, getter func(*T) string) []string {
+// extractProjectIDs extracts project IDs from a slice
+func extractProjectIDs(items []*l8bugs.BugsProject) []string {
 	ids := make([]string, len(items))
 	for i, item := range items {
-		ids[i] = getter(item)
+		ids[i] = item.ProjectId
+	}
+	return ids
+}
+
+// extractAssigneeIDs extracts assignee IDs from a slice
+func extractAssigneeIDs(items []*l8bugs.BugsAssignee) []string {
+	ids := make([]string, len(items))
+	for i, item := range items {
+		ids[i] = item.AssigneeId
+	}
+	return ids
+}
+
+// extractBugIDs extracts bug IDs from a slice
+func extractBugIDs(items []*l8bugs.Bug) []string {
+	ids := make([]string, len(items))
+	for i, item := range items {
+		ids[i] = item.BugId
+	}
+	return ids
+}
+
+// extractFeatureIDs extracts feature IDs from a slice
+func extractFeatureIDs(items []*l8bugs.Feature) []string {
+	ids := make([]string, len(items))
+	for i, item := range items {
+		ids[i] = item.FeatureId
+	}
+	return ids
+}
+
+// extractSprintIDs extracts sprint IDs from a slice
+func extractSprintIDs(items []*l8bugs.BugsSprint) []string {
+	ids := make([]string, len(items))
+	for i, item := range items {
+		ids[i] = item.SprintId
+	}
+	return ids
+}
+
+// extractDigestIDs extracts digest IDs from a slice
+func extractDigestIDs(items []*l8bugs.BugsDigest) []string {
+	ids := make([]string, len(items))
+	for i, item := range items {
+		ids[i] = item.DigestId
 	}
 	return ids
 }

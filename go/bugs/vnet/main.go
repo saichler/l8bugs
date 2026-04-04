@@ -17,15 +17,16 @@ package main
 
 import (
 	"github.com/saichler/l8bugs/go/bugs/common"
+	l8common "github.com/saichler/l8common/go/common"
 	"os"
 
 	"github.com/saichler/l8bus/go/overlay/vnet"
 )
 
 func main() {
-	resources := common.CreateResources("vnet-" + os.Getenv("HOSTNAME"))
+	resources := l8common.CreateResources("vnet-"+os.Getenv("HOSTNAME"), "/data/logs/l8bugs", uint32(common.BUGS_VNET))
 	net := vnet.NewVNet(resources)
 	net.Start()
 	resources.Logger().Info("vnet started!")
-	common.WaitForSignal(resources)
+	l8common.WaitForSignal(resources)
 }

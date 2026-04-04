@@ -2,7 +2,7 @@ package triage
 
 import (
 	"fmt"
-	"github.com/saichler/l8bugs/go/bugs/common"
+	l8common "github.com/saichler/l8common/go/common"
 	l8bugs "github.com/saichler/l8bugs/go/types/l8bugs"
 	"github.com/saichler/l8types/go/ifs"
 )
@@ -57,7 +57,7 @@ func (t *Triager) TriageFeature(feature *l8bugs.Feature) {
 
 func (t *Triager) triageBug(bug *l8bugs.Bug) error {
 	bug.TriageStatus = l8bugs.TriageStatus_TRIAGE_STATUS_IN_PROGRESS
-	if err := common.PutEntity(bugServiceName, serviceArea, bug, t.vnic); err != nil {
+	if err := l8common.PutEntity(bugServiceName, serviceArea, bug, t.vnic); err != nil {
 		return fmt.Errorf("failed to set triage in-progress: %w", err)
 	}
 
@@ -101,7 +101,7 @@ func (t *Triager) triageBug(bug *l8bugs.Bug) error {
 		bug.AiEffortConfidence = effort.Confidence
 	}
 
-	if err := common.PutEntity(bugServiceName, serviceArea, bug, t.vnic); err != nil {
+	if err := l8common.PutEntity(bugServiceName, serviceArea, bug, t.vnic); err != nil {
 		return fmt.Errorf("failed to save triage results: %w", err)
 	}
 
@@ -114,7 +114,7 @@ func (t *Triager) triageBug(bug *l8bugs.Bug) error {
 			fmt.Printf("[triage] root cause analysis failed for %s: %s\n", bug.BugId, err)
 		} else {
 			bug.AiRootCause = formatRootCauseForStorage(bug.AiRootCause, rca)
-			if err := common.PutEntity(bugServiceName, serviceArea, bug, t.vnic); err != nil {
+			if err := l8common.PutEntity(bugServiceName, serviceArea, bug, t.vnic); err != nil {
 				fmt.Printf("[triage] failed to save root cause: %s\n", err)
 			} else {
 				fmt.Printf("[triage] bug %s root cause analyzed (confidence: %d%%)\n", bug.BugId, rca.Confidence)
@@ -127,7 +127,7 @@ func (t *Triager) triageBug(bug *l8bugs.Bug) error {
 
 func (t *Triager) triageFeature(feature *l8bugs.Feature) error {
 	feature.TriageStatus = l8bugs.TriageStatus_TRIAGE_STATUS_IN_PROGRESS
-	if err := common.PutEntity(featureServiceName, serviceArea, feature, t.vnic); err != nil {
+	if err := l8common.PutEntity(featureServiceName, serviceArea, feature, t.vnic); err != nil {
 		return fmt.Errorf("failed to set triage in-progress: %w", err)
 	}
 
@@ -166,7 +166,7 @@ func (t *Triager) triageFeature(feature *l8bugs.Feature) error {
 		feature.AiEstimatedEffort = effort.EstimatedEffort
 	}
 
-	if err := common.PutEntity(featureServiceName, serviceArea, feature, t.vnic); err != nil {
+	if err := l8common.PutEntity(featureServiceName, serviceArea, feature, t.vnic); err != nil {
 		return fmt.Errorf("failed to save triage results: %w", err)
 	}
 
@@ -177,11 +177,11 @@ func (t *Triager) triageFeature(feature *l8bugs.Feature) error {
 func (t *Triager) markBugFailed(bug *l8bugs.Bug, errMsg string) {
 	bug.TriageStatus = l8bugs.TriageStatus_TRIAGE_STATUS_FAILED
 	bug.TriageError = errMsg
-	_ = common.PutEntity(bugServiceName, serviceArea, bug, t.vnic)
+	_ = l8common.PutEntity(bugServiceName, serviceArea, bug, t.vnic)
 }
 
 func (t *Triager) markFeatureFailed(feature *l8bugs.Feature, errMsg string) {
 	feature.TriageStatus = l8bugs.TriageStatus_TRIAGE_STATUS_FAILED
 	feature.TriageError = errMsg
-	_ = common.PutEntity(featureServiceName, serviceArea, feature, t.vnic)
+	_ = l8common.PutEntity(featureServiceName, serviceArea, feature, t.vnic)
 }

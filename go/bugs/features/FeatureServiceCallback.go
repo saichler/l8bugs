@@ -1,24 +1,21 @@
 package features
 
 import (
-	"github.com/saichler/l8bugs/go/bugs/common"
+	l8common "github.com/saichler/l8common/go/common"
 	"github.com/saichler/l8bugs/go/bugs/triage"
 	l8bugs "github.com/saichler/l8bugs/go/types/l8bugs"
 	"github.com/saichler/l8types/go/ifs"
 )
 
-func newFeatureServiceCallback() ifs.IServiceCallback {
-	return common.NewValidation[l8bugs.Feature]("Feature",
-		func(e *l8bugs.Feature) { common.GenerateID(&e.FeatureId) }).
+func newFeatureServiceCallback(vnic ifs.IVNic) ifs.IServiceCallback {
+	return l8common.NewValidation(&l8bugs.Feature{}, vnic).
 		Require(func(e *l8bugs.Feature) string { return e.FeatureId }, "FeatureId").
 		Require(func(e *l8bugs.Feature) string { return e.ProjectId }, "ProjectId").
 		Require(func(e *l8bugs.Feature) string { return e.Title }, "Title").
-		StatusTransition(&common.StatusTransitionConfig[l8bugs.Feature]{
-			StatusGetter: func(e *l8bugs.Feature) int32 { return int32(e.Status) },
-			StatusSetter: func(e *l8bugs.Feature, s int32) { e.Status = l8bugs.FeatureStatus(s) },
-			FilterBuilder: func(e *l8bugs.Feature) *l8bugs.Feature {
-				return &l8bugs.Feature{FeatureId: e.FeatureId}
-			},
+		StatusTransition(&l8common.StatusTransitionConfig{
+			StatusGetter:  func(e interface{}) int32 { return int32(e.(*l8bugs.Feature).Status) },
+			StatusSetter:  func(e interface{}, s int32) { e.(*l8bugs.Feature).Status = l8bugs.FeatureStatus(s) },
+			FilterBuilder: func(e interface{}) interface{} { return &l8bugs.Feature{FeatureId: e.(*l8bugs.Feature).FeatureId} },
 			ServiceName:   ServiceName,
 			ServiceArea:   ServiceArea,
 			InitialStatus: int32(l8bugs.FeatureStatus_FEATURE_STATUS_PROPOSED),

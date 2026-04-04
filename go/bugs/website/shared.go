@@ -1,7 +1,7 @@
 package website
 
 import (
-	"github.com/saichler/l8bugs/go/bugs/common"
+	l8common "github.com/saichler/l8common/go/common"
 	l8bugs "github.com/saichler/l8bugs/go/types/l8bugs"
 	"github.com/saichler/l8bus/go/overlay/vnic"
 	"github.com/saichler/l8types/go/ifs"
@@ -9,8 +9,7 @@ import (
 )
 
 func CreateVnic(vnet uint32) ifs.IVNic {
-	resources := common.CreateResources("web-" + strconv.Itoa(int(vnet)))
-	resources.SysConfig().VnetPort = vnet
+	resources := l8common.CreateResources("web-"+strconv.Itoa(int(vnet)), "/data/logs/l8bugs", vnet)
 
 	RegisterTypes(resources)
 
@@ -27,10 +26,10 @@ func RegisterTypes(resources ifs.IResources) {
 }
 
 func registerBugsTypes(resources ifs.IResources) {
-	common.RegisterType[l8bugs.BugsProject, l8bugs.BugsProjectList](resources, "ProjectId")
-	common.RegisterType[l8bugs.BugsAssignee, l8bugs.BugsAssigneeList](resources, "AssigneeId")
-	common.RegisterType[l8bugs.Bug, l8bugs.BugList](resources, "BugId")
-	common.RegisterType[l8bugs.Feature, l8bugs.FeatureList](resources, "FeatureId")
-	common.RegisterType[l8bugs.BugsSprint, l8bugs.BugsSprintList](resources, "SprintId")
-	common.RegisterType[l8bugs.BugsDigest, l8bugs.BugsDigestList](resources, "DigestId")
+	l8common.RegisterType(resources, &l8bugs.BugsProject{}, &l8bugs.BugsProjectList{}, "ProjectId")
+	l8common.RegisterType(resources, &l8bugs.BugsAssignee{}, &l8bugs.BugsAssigneeList{}, "AssigneeId")
+	l8common.RegisterType(resources, &l8bugs.Bug{}, &l8bugs.BugList{}, "BugId")
+	l8common.RegisterType(resources, &l8bugs.Feature{}, &l8bugs.FeatureList{}, "FeatureId")
+	l8common.RegisterType(resources, &l8bugs.BugsSprint{}, &l8bugs.BugsSprintList{}, "SprintId")
+	l8common.RegisterType(resources, &l8bugs.BugsDigest{}, &l8bugs.BugsDigestList{}, "DigestId")
 }

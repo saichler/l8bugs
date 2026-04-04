@@ -1,23 +1,20 @@
 package sprints
 
 import (
-	"github.com/saichler/l8bugs/go/bugs/common"
+	l8common "github.com/saichler/l8common/go/common"
 	l8bugs "github.com/saichler/l8bugs/go/types/l8bugs"
 	"github.com/saichler/l8types/go/ifs"
 )
 
-func newSprintServiceCallback() ifs.IServiceCallback {
-	return common.NewValidation[l8bugs.BugsSprint]("BugsSprint",
-		func(e *l8bugs.BugsSprint) { common.GenerateID(&e.SprintId) }).
+func newSprintServiceCallback(vnic ifs.IVNic) ifs.IServiceCallback {
+	return l8common.NewValidation(&l8bugs.BugsSprint{}, vnic).
 		Require(func(e *l8bugs.BugsSprint) string { return e.SprintId }, "SprintId").
 		Require(func(e *l8bugs.BugsSprint) string { return e.ProjectId }, "ProjectId").
 		Require(func(e *l8bugs.BugsSprint) string { return e.Name }, "Name").
-		StatusTransition(&common.StatusTransitionConfig[l8bugs.BugsSprint]{
-			StatusGetter: func(e *l8bugs.BugsSprint) int32 { return int32(e.Status) },
-			StatusSetter: func(e *l8bugs.BugsSprint, s int32) { e.Status = l8bugs.SprintStatus(s) },
-			FilterBuilder: func(e *l8bugs.BugsSprint) *l8bugs.BugsSprint {
-				return &l8bugs.BugsSprint{SprintId: e.SprintId}
-			},
+		StatusTransition(&l8common.StatusTransitionConfig{
+			StatusGetter:  func(e interface{}) int32 { return int32(e.(*l8bugs.BugsSprint).Status) },
+			StatusSetter:  func(e interface{}, s int32) { e.(*l8bugs.BugsSprint).Status = l8bugs.SprintStatus(s) },
+			FilterBuilder: func(e interface{}) interface{} { return &l8bugs.BugsSprint{SprintId: e.(*l8bugs.BugsSprint).SprintId} },
 			ServiceName:   ServiceName,
 			ServiceArea:   ServiceArea,
 			InitialStatus: int32(l8bugs.SprintStatus_SPRINT_STATUS_PLANNING),
